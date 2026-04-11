@@ -1,1 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
+
+/* ─────────────────────────────────────────────
+   CUSTOM THEME VARIABLES
+───────────────────────────────────────────── */
+@theme {
+  /* Custom colors */
+  --color-pink-1: #FCC7D1;
+  --color-pink-2: #F0B3C5;
+  --color-pink-3: #E47990;
+  --color-pink-4: #DE8C9C;
+  --color-pink-5: #F8D8DE;
+  --color-pink-6: #B8445E;
+
+  /* Alias nama mudah diingat */
+  --color-pink-lightest:    #FCC7D1;
+  --color-pink-pastel:      #F0B3C5;
+  --color-pink-medium:      #E47990;
+  --color-pink-soft:        #DE8C9C;
+  --color-pink-extra-light: #F8D8DE;
+  --color-pink-dark:        #B8445E;
+  /* Breakpoint xs untuk HP kecil */
+  --breakpoint-xs: 400px;
+
+  /* Warna teks */
+  --color-text-dark: #6B2A3A;
+  --color-text-mid:  #9C4F63;
+
+  /* Font */
+  --font-family-script: 'Dancing Script', cursive;
+  --font-family-body: 'Poppins', sans-serif;
+
+  /* Shadows milik kamu */
+  --shadow-soft:   0 4px 6px -1px rgba(184, 68, 94, 0.05), 0 2px 4px -1px rgba(184, 68, 94, 0.03);
+  --shadow-button: 0 8px 15px -3px rgba(184, 68, 94, 0.3);
+
+  /* ✅ TAMBAHAN: shadow card & navbar untuk komponen */
+  --shadow-card:       0 2px 12px rgba(184, 68, 94, 0.10);
+  --shadow-card-hover: 0 8px 22px rgba(184, 68, 94, 0.20);
+  --shadow-nav:        0 2px 16px rgba(184, 68, 94, 0.12);
+}
+
+/* ─────────────────────────────────────────────
+   ✅ TAMBAHAN: KEYFRAMES
+   Dipakai oleh .animate-float & .animate-fade-up
+───────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0px); }
+}
+
+/* ─────────────────────────────────────────────
+   CUSTOM UTILITIES
+───────────────────────────────────────────── */
+@layer utilities {
+  /* Milik kamu — tetap */
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-button {
+    box-shadow: var(--shadow-button);
+  }
+
+  /* ✅ TAMBAHAN */
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .shadow-nav {
+    box-shadow: var(--shadow-nav);
+  }
+
+  /* font Dancing Script */
+  .font-script {
+    font-family: var(--font-family-script);
+  }
+
+  /* animasi banner emoji */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* animasi greeting muncul */
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease both;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────────── */
+@layer base {
+  body {
+    font-family: var(--font-family-body);
+    @apply antialiased;
+  }
+
+  /* ✅ TAMBAHAN */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  input:focus {
+    outline: none;
+  }
+}
