@@ -1,6 +1,7 @@
 import { useState } from "react";
 import products from "../data/products";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 /* ── Format harga ─────────────────────────────────────────── */
 const formatRp = (n) => "Rp" + n.toLocaleString("id-ID");
@@ -223,6 +224,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
           </div>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }
