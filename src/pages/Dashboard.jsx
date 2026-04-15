@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import productsData from "../data/products"; // backup jika API gagal
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { getProducts } from "../services/api";
+import { getProducts, getProductById } from "../services/api";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 
 /* ── Format harga ─────────────────────────────────────────── */
 const formatRp = (n) => "Rp" + n.toLocaleString("id-ID");
@@ -87,13 +93,21 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [favs, setFavs] = useState({});
+  const navigate = useNavigate();
+
+  const handleDetailProduk = (productId) => {
+    console.log("Navigating to product:", productId); // Debugging
+    navigate(`/produk/${productId}`);
+  };
 
   // Transform API data to match component structure
   const transformProductData = (apiProduct) => {
     // Map kategori to match existing tabs
     let category = "Snack";
-    if (apiProduct.kategori?.toLowerCase() === "catering" || 
-        apiProduct.kategori?.toLowerCase() === "makanan") {
+    if (
+      apiProduct.kategori?.toLowerCase() === "catering" ||
+      apiProduct.kategori?.toLowerCase() === "makanan"
+    ) {
       category = "Catering";
     } else if (apiProduct.kategori?.toLowerCase() === "promo") {
       category = "Promo";
@@ -101,15 +115,19 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
 
     // Generate random rating between 3.5 - 5.0 (since API doesn't provide rating)
     const rating = 3.5 + Math.random() * 1.5;
-    
+
     // Add emoji based on product name/kategori
     let emoji = "🍽️";
     if (apiProduct.nama_produk?.toLowerCase().includes("nasi")) emoji = "🍚";
-    else if (apiProduct.nama_produk?.toLowerCase().includes("ayam")) emoji = "🍗";
-    else if (apiProduct.nama_produk?.toLowerCase().includes("sate")) emoji = "🍢";
-    else if (apiProduct.nama_produk?.toLowerCase().includes("mie")) emoji = "🍜";
-    else if (apiProduct.nama_produk?.toLowerCase().includes("snack")) emoji = "🍿";
-    
+    else if (apiProduct.nama_produk?.toLowerCase().includes("ayam"))
+      emoji = "🍗";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("sate"))
+      emoji = "🍢";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("mie"))
+      emoji = "🍜";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("snack"))
+      emoji = "🍿";
+
     // Add badge for promo or low stock
     let badge = null;
     if (apiProduct.stok < 10) badge = "🔥 HABIS";
@@ -125,7 +143,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
       emoji: emoji,
       badge: badge,
       stock: apiProduct.stok,
-      originalData: apiProduct
+      originalData: apiProduct,
     };
   };
 
@@ -135,18 +153,18 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
       try {
         setLoading(true);
         const response = await getProducts();
-        
+
         if (response.success && response.data) {
           const transformedProducts = response.data.map(transformProductData);
           setProducts(transformedProducts);
-          
+
           // Initialize favorites from localStorage or default false
           const savedFavs = localStorage.getItem("productFavorites");
           if (savedFavs) {
             setFavs(JSON.parse(savedFavs));
           } else {
             const initialFavs = {};
-            transformedProducts.forEach(p => {
+            transformedProducts.forEach((p) => {
               initialFavs[p.id] = false;
             });
             setFavs(initialFavs);
@@ -156,7 +174,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
           console.warn("API returned unexpected format, using local data");
           setProducts(productsData);
           const initialFavs = {};
-          productsData.forEach(p => {
+          productsData.forEach((p) => {
             initialFavs[p.id] = p.fav || false;
           });
           setFavs(initialFavs);
@@ -167,7 +185,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
         // Fallback to local data
         setProducts(productsData);
         const initialFavs = {};
-        productsData.forEach(p => {
+        productsData.forEach((p) => {
           initialFavs[p.id] = p.fav || false;
         });
         setFavs(initialFavs);
@@ -191,7 +209,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   };
 
   const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const tabs = [
@@ -309,14 +327,16 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
         {/* Grid: 3 kolom HP → 4 kolom desktop */}
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
           {filtered
-            .filter(p => activeTab === "Promo" ? p.badge : p.category === activeTab)
+            .filter((p) =>
+              activeTab === "Promo" ? p.badge : p.category === activeTab,
+            )
             .map((p) => (
               <ProductCard
                 key={p.id}
                 product={p}
                 isFav={favs[p.id]}
                 onToggleFav={toggleFav}
-                onDetailProduk={onDetailProduk}
+                onDetailProduk={() => handleDetailProduk(p.id)} // ← Kirim ID, bukan object
               />
             ))}
         </div>

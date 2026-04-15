@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // Jika menggunakan React Router
+import { getProductById } from "../services/api";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 /* ── Data ulasan ─────────────────────────────────────────── */
@@ -24,7 +26,10 @@ function Stars({ rating, size = "text-lg" }) {
   return (
     <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
-        <span key={i} className={`${size} ${i < rating ? "text-yellow-400" : "text-gray-300"}`}>
+        <span
+          key={i}
+          className={`${size} ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
+        >
           ★
         </span>
       ))}
@@ -33,25 +38,115 @@ function Stars({ rating, size = "text-lg" }) {
 }
 
 /* ── Halaman Detail Produk ───────────────────────────────── */
-export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount = 0 }) {
-  const [qty, setQty]     = useState(1);
+export default function DetailProduk({
+  onBack,
+  onPesan,
+  onKeranjang,
+  cartCount = 0,
+}) {
+  const [qty, setQty] = useState(1);
   const [likes, setLikes] = useState({ 1: false, 2: true });
+  const [produk, setProduk] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const toggleLike = (id) =>
-    setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
+  // Ambil ID dari URL params (gunakan ini jika pakai React Router)
+  const { id } = useParams();
 
-  const produk = {
-    nama: "Risoles Mayonaise",
-    rating: 4.5,
-    harga: 2500,
-    deskripsi:
-      "Risol mayo adalah camilan gurih dengan kulit renyah berisi mayones creamy, sosis, dan telur. Rasanya lezat dan bikin nagih, cocok untuk camilan santai atau teman kumpul.",
-    emoji: "🥟",
-  };
+  // Atau bisa juga terima sebagai prop
+  // const { productId } = props;
+
+  const toggleLike = (id) => setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  // Fetch data produk saat component mount atau ID berubah
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Gunakan ID dari params atau props
+        const productId = id; // atau props.productId
+
+        if (!productId) {
+          throw new Error("Product ID tidak ditemukan");
+        }
+
+        const response = await getProductById(productId);
+
+        if (response.success && response.data) {
+          // Mapping data dari API ke format yang digunakan component
+          const productData = {
+            id: response.data._id,
+            nama: response.data.nama_produk,
+            harga: response.data.harga,
+            rating: response.data.rating || 4.5, // Default rating jika tidak ada
+            deskripsi:
+              response.data.deskripsi || "Deskripsi produk belum tersedia",
+            emoji: response.data.emoji || "🥟", // Default emoji jika tidak ada
+            stok: response.data.stok,
+            kategori: response.data.kategori,
+          };
+          setProduk(productData);
+        } else {
+          throw new Error("Gagal mengambil data produk");
+        }
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError(err.message || "Terjadi kesalahan saat memuat produk");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]); // atau [props.productId]
+
+  // Tampilkan loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-pink-5 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🍳</div>
+          <p className="text-pink-6 font-semibold">Memuat produk...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Tampilkan error state
+  if (error || !produk) {
+    return (
+      <div className="min-h-screen bg-pink-5 flex flex-col">
+        <div className="flex items-center px-4 py-3 bg-white">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
+          >
+            <span className="text-lg">←</span>
+            Kembali
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center p-6">
+            <div className="text-6xl mb-4">😞</div>
+            <p className="text-gray-600 mb-4">
+              {error || "Produk tidak ditemukan"}
+            </p>
+            <button
+              onClick={onBack}
+              className="bg-pink-6 text-white px-6 py-2 rounded-full"
+            >
+              Kembali ke Beranda
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-pink-5 flex flex-col">
-
       {/* ── Top Bar ────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-3 bg-white">
         <button
@@ -77,7 +172,6 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
 
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-28">
-
         {/* Foto produk */}
         <div className="w-full h-56 lg:h-72 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
           {produk.emoji}
@@ -85,7 +179,6 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
 
         {/* Info produk */}
         <div className="bg-white px-5 py-5">
-
           {/* Nama */}
           <h1 className="text-xl lg:text-2xl font-extrabold text-pink-6 mb-1">
             {produk.nama}
@@ -94,7 +187,9 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
           {/* Rating */}
           <div className="flex items-center gap-2 mb-3">
             <Stars rating={Math.floor(produk.rating)} />
-            <span className="text-sm font-semibold text-gray-500">{produk.rating}</span>
+            <span className="text-sm font-semibold text-gray-500">
+              {produk.rating}
+            </span>
           </div>
 
           {/* Toko */}
@@ -104,11 +199,22 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
                 src={logoMamaPasha}
                 alt="Logo"
                 className="w-full h-full object-cover"
-                onError={(e) => { e.target.style.display = "none"; }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
               />
             </div>
-            <span className="text-sm font-semibold text-gray-700">Mama Pasha&apos;s Treats</span>
+            <span className="text-sm font-semibold text-gray-700">
+              Mama Pasha&apos;s Treats
+            </span>
           </div>
+
+          {/* Stok info (optional) */}
+          {produk.stok !== undefined && (
+            <p className="text-xs text-gray-500 mb-2">
+              Stok: {produk.stok} tersisa
+            </p>
+          )}
 
           {/* Harga */}
           <p className="text-2xl lg:text-3xl font-extrabold text-pink-6 mb-3">
@@ -125,6 +231,7 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
             <button
               onClick={() => setQty((n) => Math.max(1, n - 1))}
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
+              disabled={produk.stok === 0}
             >
               −
             </button>
@@ -132,17 +239,22 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
               {qty}
             </div>
             <button
-              onClick={() => setQty((n) => n + 1)}
+              onClick={() =>
+                setQty((n) => Math.min(n + 1, produk.stok || Infinity))
+              }
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
+              disabled={produk.stok === 0}
             >
               +
             </button>
           </div>
+          {produk.stok === 0 && (
+            <p className="text-red-500 text-xs text-right mt-1">Stok habis</p>
+          )}
         </div>
 
         {/* ── Ulasan ─────────────────────────────────────────── */}
         <div className="mx-4 mt-4 bg-pink-1/40 rounded-2xl overflow-hidden">
-
           {/* Header ulasan */}
           <div className="px-4 py-3 border-b-2 border-pink-6/30">
             <h2 className="text-base font-extrabold text-pink-6">
@@ -188,17 +300,18 @@ export default function DetailProduk({ onBack, onPesan, onKeranjang, cartCount =
         <button
           onClick={() => onKeranjang && onKeranjang(produk, qty)}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
+          disabled={produk.stok === 0}
         >
           + Keranjang
         </button>
         <button
           onClick={() => onPesan && onPesan(produk, qty)}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
+          disabled={produk.stok === 0}
         >
           Pesan Sekarang
         </button>
       </div>
-
     </div>
   );
 }
