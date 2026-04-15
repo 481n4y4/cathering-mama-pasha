@@ -2,13 +2,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+// import ProductDetails from "./pages/ProductDetails.jsx";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth" element={<LoginPage />} />
         <Route path="/" element={<Dashboard />} />
+        {/* <Route path="/product/:id" element={<ProductDetails />} /> */}
       </Routes>
     </BrowserRouter>
   );

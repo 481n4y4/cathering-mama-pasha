@@ -1,7 +1,8 @@
-import { useState } from "react";
-import products from "../data/products";
+import { useState, useEffect } from "react";
+import productsData from "../data/products"; // backup jika API gagal
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { getProducts } from "../services/api";
 
 /* ── Format harga ─────────────────────────────────────────── */
 const formatRp = (n) => "Rp" + n.toLocaleString("id-ID");
@@ -42,7 +43,7 @@ function ProductCard({ product, isFav, onToggleFav, onDetailProduk }) {
     >
       {/* Gambar / emoji */}
       <div className="w-full aspect-square bg-pink-5 flex items-center justify-center text-4xl lg:text-5xl">
-        {product.emoji}
+        {product.emoji || "🍽️"}
       </div>
 
       {/* Badge diskon/HOT */}
@@ -54,7 +55,10 @@ function ProductCard({ product, isFav, onToggleFav, onDetailProduk }) {
 
       {/* Tombol favorit */}
       <button
-        onClick={() => onToggleFav(product.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFav(product.id);
+        }}
         className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-sm border-none cursor-pointer"
         aria-label="Toggle favorit"
       >
@@ -79,14 +83,115 @@ function ProductCard({ product, isFav, onToggleFav, onDetailProduk }) {
 export default function Dashboard({ onAddToCart, onDetailProduk }) {
   const [activeTab, setActiveTab] = useState("Snack");
   const [search, setSearch] = useState("");
-  const [favs, setFavs] = useState(() =>
-    products.reduce((acc, p) => ({ ...acc, [p.id]: p.fav }), {}),
-  );
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [favs, setFavs] = useState({});
 
-  const toggleFav = (id) => setFavs((prev) => ({ ...prev, [id]: !prev[id] }));
+  // Transform API data to match component structure
+  const transformProductData = (apiProduct) => {
+    // Map kategori to match existing tabs
+    let category = "Snack";
+    if (apiProduct.kategori?.toLowerCase() === "catering" || 
+        apiProduct.kategori?.toLowerCase() === "makanan") {
+      category = "Catering";
+    } else if (apiProduct.kategori?.toLowerCase() === "promo") {
+      category = "Promo";
+    }
+
+    // Generate random rating between 3.5 - 5.0 (since API doesn't provide rating)
+    const rating = 3.5 + Math.random() * 1.5;
+    
+    // Add emoji based on product name/kategori
+    let emoji = "🍽️";
+    if (apiProduct.nama_produk?.toLowerCase().includes("nasi")) emoji = "🍚";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("ayam")) emoji = "🍗";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("sate")) emoji = "🍢";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("mie")) emoji = "🍜";
+    else if (apiProduct.nama_produk?.toLowerCase().includes("snack")) emoji = "🍿";
+    
+    // Add badge for promo or low stock
+    let badge = null;
+    if (apiProduct.stok < 10) badge = "🔥 HABIS";
+    else if (apiProduct.stok < 20) badge = "⭐ LIMITED";
+    else if (category === "Promo") badge = "🔥 PROMO";
+
+    return {
+      id: apiProduct._id,
+      name: apiProduct.nama_produk,
+      price: apiProduct.harga,
+      category: category,
+      rating: parseFloat(rating.toFixed(1)),
+      emoji: emoji,
+      badge: badge,
+      stock: apiProduct.stok,
+      originalData: apiProduct
+    };
+  };
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await getProducts();
+        
+        if (response.success && response.data) {
+          const transformedProducts = response.data.map(transformProductData);
+          setProducts(transformedProducts);
+          
+          // Initialize favorites from localStorage or default false
+          const savedFavs = localStorage.getItem("productFavorites");
+          if (savedFavs) {
+            setFavs(JSON.parse(savedFavs));
+          } else {
+            const initialFavs = {};
+            transformedProducts.forEach(p => {
+              initialFavs[p.id] = false;
+            });
+            setFavs(initialFavs);
+          }
+        } else {
+          // Fallback to local data if API returns unexpected format
+          console.warn("API returned unexpected format, using local data");
+          setProducts(productsData);
+          const initialFavs = {};
+          productsData.forEach(p => {
+            initialFavs[p.id] = p.fav || false;
+          });
+          setFavs(initialFavs);
+        }
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setError("Gagal memuat produk. Menggunakan data lokal.");
+        // Fallback to local data
+        setProducts(productsData);
+        const initialFavs = {};
+        productsData.forEach(p => {
+          initialFavs[p.id] = p.fav || false;
+        });
+        setFavs(initialFavs);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Save favorites to localStorage
+  useEffect(() => {
+    if (Object.keys(favs).length > 0) {
+      localStorage.setItem("productFavorites", JSON.stringify(favs));
+    }
+  }, [favs]);
+
+  const toggleFav = (id) => {
+    setFavs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
+    p.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const tabs = [
@@ -94,6 +199,22 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🍱 Catering", key: "Catering" },
     { label: "🔥 Promo", key: "Promo" },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <main>
+        <Navbar />
+        <section className="w-full max-w-[500px] lg:max-w-[860px] mx-auto px-4 lg:px-10 pt-7 pb-16">
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4 animate-spin">⏳</div>
+            <p className="text-text-mid">Memuat produk...</p>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -108,6 +229,13 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             Mau makan enak hari ini?
           </p>
         </div>
+
+        {/* ── Error Message ───────────────────────────────────── */}
+        {error && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+            ⚠️ {error}
+          </div>
+        )}
 
         {/* ── Search Bar ───────────────────────────────────────── */}
         <div className="relative mb-4">
@@ -180,15 +308,17 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
 
         {/* Grid: 3 kolom HP → 4 kolom desktop */}
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
-          {filtered.map((p) => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              isFav={favs[p.id]}
-              onToggleFav={toggleFav}
-              onDetailProduk={onDetailProduk}
-            />
-          ))}
+          {filtered
+            .filter(p => activeTab === "Promo" ? p.badge : p.category === activeTab)
+            .map((p) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                isFav={favs[p.id]}
+                onToggleFav={toggleFav}
+                onDetailProduk={onDetailProduk}
+              />
+            ))}
         </div>
 
         {/* ── Tentang Kami ─────────────────────────────────────── */}
