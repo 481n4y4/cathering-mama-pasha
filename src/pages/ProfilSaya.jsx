@@ -1,4 +1,4 @@
-import ProfilLayout from "./ProfilLayout";
+import Sidebar from "../components/Sidebar";
 
 const infoRows = [
   { label: "Username",      value: "Jeno"                   },
@@ -11,7 +11,7 @@ const infoRows = [
 
 export default function ProfilSaya({ onNavigate }) {
   return (
-    <ProfilLayout
+    <Sidebar
       activeMenu="profil-saya"
       onNavigate={onNavigate}
       title="Profil Saya"
@@ -67,6 +67,6 @@ export default function ProfilSaya({ onNavigate }) {
         </div>
       </div>
 
-    </ProfilLayout>
+    </Sidebar>
   );
 }

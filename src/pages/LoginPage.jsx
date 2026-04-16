@@ -60,12 +60,20 @@ const LoginForm = () => {
       console.log("Password:", formData.password);
 
       if (response.ok) {
-        // Save token to localStorage
-        if (data.token) {
-          localStorage.setItem("token", data.token);
+        // Support several common API response shapes for token/user payload.
+        const token =
+          data?.token ||
+          data?.accessToken ||
+          data?.data?.token ||
+          data?.data?.accessToken;
+        const user = data?.user || data?.data?.user;
+
+        if (token) {
+          localStorage.setItem("token", token);
+          window.dispatchEvent(new Event("auth-changed"));
         }
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
+        if (user) {
+          localStorage.setItem("user", JSON.stringify(user));
         }
 
         alert("Login berhasil!");

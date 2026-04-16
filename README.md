@@ -11,7 +11,7 @@ Frontend website untuk layanan **Cathering Mama Pasha** — platform pemesanan m
 - [ ] Dashboard Admin 
 - [ ] Navbar Sebelum Login
 - [ ] Navbar Sesudah Login 
-- [ ] Product Detail 
+- [x] Product Detail 
 - [ ] Checkout
 - [x] Login/Register Page
 

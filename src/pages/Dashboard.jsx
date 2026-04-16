@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
 import productsData from "../data/products"; // backup jika API gagal
-import Navbar from "../components/Navbar";
+import NavbarAfter from "../components/NavbarAfter";
+import NavbarBefore from "../components/NavbarBefore";
 import Footer from "../components/Footer";
-import { getProducts, getProductById } from "../services/api";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { getProducts } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 /* ── Format harga ─────────────────────────────────────────── */
 const formatRp = (n) => "Rp" + n.toLocaleString("id-ID");
@@ -93,6 +89,9 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [favs, setFavs] = useState({});
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => !!localStorage.getItem("token"),
+  );
   const navigate = useNavigate();
 
   const handleDetailProduk = (productId) => {
@@ -204,6 +203,24 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     }
   }, [favs]);
 
+  // Sync auth status from localStorage (cross-tab + when tab gets focus)
+  useEffect(() => {
+    const syncAuthStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+
+    syncAuthStatus();
+    window.addEventListener("auth-changed", syncAuthStatus);
+    window.addEventListener("storage", syncAuthStatus);
+    window.addEventListener("focus", syncAuthStatus);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncAuthStatus);
+      window.removeEventListener("storage", syncAuthStatus);
+      window.removeEventListener("focus", syncAuthStatus);
+    };
+  }, []);
+
   const toggleFav = (id) => {
     setFavs((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -218,11 +235,13 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🔥 Promo", key: "Promo" },
   ];
 
+  const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
+
   // Show loading state
   if (loading) {
     return (
       <main>
-        <Navbar />
+        <ActiveNavbar />
         <section className="w-full max-w-[500px] lg:max-w-[860px] mx-auto px-4 lg:px-10 pt-7 pb-16">
           <div className="text-center py-20">
             <div className="text-4xl mb-4 animate-spin">⏳</div>
@@ -236,7 +255,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
 
   return (
     <main>
-      <Navbar />
+      <ActiveNavbar />
       <section className="w-full max-w-[500px] lg:max-w-[860px] mx-auto px-4 lg:px-10 pt-7 pb-16">
         {/* ── Greeting ─────────────────────────────────────────── */}
         <div className="text-center mb-5 animate-fade-up">

@@ -1,34 +1,45 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
- 
-export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
-  const [hoverProfile, setHoverProfile] = useState(false);
-  const [hoverCart, setHoverCart]       = useState(false);
+
+export default function NavbarBefore({
+  cartCount = 0,
+  onCartClick,
+  onAuthClick,
+}) {
+  const [hoverAuth, setHoverAuth] = useState(false);
+  const [hoverCart, setHoverCart] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAuthClick = () => {
+    if (onAuthClick) {
+      onAuthClick();
+      return;
+    }
+    navigate("/auth");
+  };
 
   return (
     <div className="sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
       <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-3 bg-white rounded-full border border-pink-2 shadow-nav">
-
-        {/* ── Kolom 1: Profil (rata kiri) ── */}
         <div className="flex justify-start">
           <button
-            onClick={onProfilClick}
-            onMouseEnter={() => setHoverProfile(true)}
-            onMouseLeave={() => setHoverProfile(false)}
+            onClick={handleAuthClick}
+            onMouseEnter={() => setHoverAuth(true)}
+            onMouseLeave={() => setHoverAuth(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full pl-1 pr-2.5 py-1 transition-colors duration-200 ${
-              hoverProfile ? "bg-pink-1" : "bg-pink-5"
+              hoverAuth ? "bg-pink-1" : "bg-pink-5"
             }`}
           >
-            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
-              MP
+            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-linear-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
+              LR
             </div>
             <span className="text-[11px] lg:text-sm font-bold text-text-dark whitespace-nowrap">
-              Profil Anda
+              Login / Register
             </span>
           </button>
         </div>
 
-        {/* ── Kolom 2: Logo (tepat tengah) ── */}
         <div className="flex justify-center">
           <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full overflow-hidden border-2 border-pink-2 shrink-0">
             <img
@@ -39,7 +50,6 @@ export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
           </div>
         </div>
 
-        {/* ── Kolom 3: Keranjang (rata kanan) ── */}
         <div className="flex justify-end">
           <button
             onClick={onCartClick}
@@ -62,7 +72,6 @@ export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
             </span>
           </button>
         </div>
-
       </nav>
     </div>
   );
