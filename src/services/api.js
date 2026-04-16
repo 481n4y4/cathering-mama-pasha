@@ -32,4 +32,19 @@ export const getProductById = async (id) => {
   }
 };
 
+export const getUserById = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/api/user/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching user with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export default api;

@@ -235,6 +235,17 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🔥 Promo", key: "Promo" },
   ];
 
+  const handleLogout = () => {
+    // Hapus sesi dari local storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+
+    // Perbarui state dan pancarkan event
+    setIsLoggedIn(false);
+    window.dispatchEvent(new Event("auth-changed"));
+  };
+
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
 
   // Show loading state
@@ -257,6 +268,18 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     <main>
       <ActiveNavbar />
       <section className="w-full max-w-[500px] lg:max-w-[860px] mx-auto px-4 lg:px-10 pt-7 pb-16">
+        {/* ── Tombol Logout ────────────────────────────────────── */}
+        {isLoggedIn && (
+          <div className="flex justify-end mb-2 animate-fade-up">
+            <button
+              onClick={handleLogout}
+              className="text-xs lg:text-sm font-bold text-pink-6 bg-white border border-pink-2 rounded-full px-5 py-1.5 hover:bg-pink-6 hover:text-white hover:border-pink-6 transition-all shadow-sm"
+            >
+              Keluar (Logout)
+            </button>
+          </div>
+        )}
+
         {/* ── Greeting ─────────────────────────────────────────── */}
         <div className="text-center mb-5 animate-fade-up">
           <h1 className="font-script text-pink-6 font-bold leading-tight text-[34px] lg:text-5xl">

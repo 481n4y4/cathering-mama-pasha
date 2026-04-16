@@ -59,22 +59,23 @@ const LoginForm = () => {
       console.log("Login response:", data);
       console.log("Password:", formData.password);
 
-      if (response.ok) {
-        // Support several common API response shapes for token/user payload.
-        const token =
-          data?.token ||
-          data?.accessToken ||
-          data?.data?.token ||
-          data?.data?.accessToken;
-        const user = data?.user || data?.data?.user;
+      if (response.ok || data.success) {
+        const token = data?.data?.token || data?.token;
+        const user = data?.data?.user || data?.user;
+        const userId = user?.id || user?._id;
 
         if (token) {
           localStorage.setItem("token", token);
-          window.dispatchEvent(new Event("auth-changed"));
         }
         if (user) {
           localStorage.setItem("user", JSON.stringify(user));
         }
+        if (userId) {
+          localStorage.setItem("userId", userId);
+        }
+
+        // Memancarkan event agar navbar dashboard langsung update
+        window.dispatchEvent(new Event("auth-changed"));
 
         alert("Login berhasil!");
         // Redirect to dashboard
