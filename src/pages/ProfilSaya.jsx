@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getUserById } from "../services/api";
+import NavbarProfile from "../components/NavbarProfile";
 
 export default function ProfilSaya({ onNavigate }) {
   const navigate = useNavigate();
@@ -66,19 +67,8 @@ export default function ProfilSaya({ onNavigate }) {
       title="Profil Saya"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* ── Top bar DESKTOP ── */}
-      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleNavigate("beranda")}
-            className="text-text-dark font-bold text-lg"
-          >
-            ←
-          </button>
-          <h1 className="text-xl font-extrabold text-text-dark">Profil Saya</h1>
-        </div>
-        <button className="text-text-dark text-xl">🔍</button>
-      </div>
+
+      <NavbarProfile page="/"/>
 
       {/* ── Konten ── */}
       <div className="px-4 lg:px-8 py-6">
