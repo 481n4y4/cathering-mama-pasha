@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const API = import.meta.env.VITE_API_URL; // Ganti dengan URL backend Anda
+import { loginUser, registerUser } from "../services/api";
 
 const LoginForm = () => {
   const [activeTab, setActiveTab] = useState("masuk");
@@ -47,19 +46,12 @@ const LoginForm = () => {
 
       console.log("Login request:", loginData);
 
-      const response = await fetch(`${API}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginData),
-      });
+      const data = await loginUser(loginData);
 
-      const data = await response.json();
       console.log("Login response:", data);
       console.log("Password:", formData.password);
 
-      if (response.ok || data.success) {
+      if (data.success || data.data) {
         const token = data?.data?.token || data?.token;
         const user = data?.data?.user || data?.user;
         const userId = user?.id || user?._id;
@@ -89,7 +81,11 @@ const LoginForm = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Terjadi kesalahan. Periksa koneksi internet Anda.");
+      setError(
+        err?.message ||
+          err?.error ||
+          "Terjadi kesalahan. Periksa koneksi internet Anda.",
+      );
     } finally {
       setLoading(false);
     }
@@ -124,18 +120,11 @@ const LoginForm = () => {
 
       console.log("Register request:", registerData);
 
-      const response = await fetch(`${API}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registerData),
-      });
+      const data = await registerUser(registerData);
 
-      const data = await response.json();
       console.log("Register response:", data);
 
-      if (response.ok) {
+      if (data.success || data.data) {
         alert("Pendaftaran berhasil! Silakan login.");
         // Reset register form
         setFormData((prev) => ({
@@ -159,7 +148,11 @@ const LoginForm = () => {
       }
     } catch (err) {
       console.error("Register error:", err);
-      setError("Terjadi kesalahan. Periksa koneksi internet Anda.");
+      setError(
+        err?.message ||
+          err?.error ||
+          "Terjadi kesalahan. Periksa koneksi internet Anda.",
+      );
     } finally {
       setLoading(false);
     }

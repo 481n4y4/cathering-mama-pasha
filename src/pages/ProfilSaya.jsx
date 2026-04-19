@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import EditProfileForm from "../components/EditProfileForm";
 import { getUserById } from "../services/api";
-import iconBack from "../assets/images/icon-back.webp";
-import logoMamaPasha from "../assets/images/logo-kecil.webp";
 
 export default function ProfilSaya({ onNavigate }) {
   const navigate = useNavigate();
@@ -136,17 +134,18 @@ export default function ProfilSaya({ onNavigate }) {
       title="Profil Saya"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* ══ Top bar DESKTOP ══ */}
-      <div className="hidden lg:flex items-center gap-3 px-8 py-5 shadow-md shadow-pink-800/20">
-        <button
-          onClick={() => handleNavigate("beranda")}
-          className="text-[#B8445E] font-bold text-xl hover:opacity-70 transition-opacity flex items-center justify-center w-10 h-10 rounded-full"
-        >
-          <img src={iconBack} alt="Back" className="w-6 h-6" />
-        </button>
-        <h1 className="text-xl font-extrabold text-text-dark">Profil Saya</h1>
-
-        {/* Tombol search kanan atas */}
+      {/* ── Top bar DESKTOP ── */}
+      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => handleNavigate("beranda")}
+            className="text-text-dark font-bold text-lg"
+          >
+            ←
+          </button>
+          <h1 className="text-xl font-extrabold text-text-dark">Profil Saya</h1>
+        </div>
+        <button className="text-text-dark text-xl">🔍</button>
       </div>
 
       {/* ══════════════════════════════════
