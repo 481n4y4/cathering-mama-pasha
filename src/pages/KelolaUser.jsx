@@ -32,8 +32,7 @@ const KelolaUser = () => {
   }, []);
 
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen">
-      <SidebarAdmin />
+    <SidebarAdmin title="Kelola User">
       <div className="flex-1 flex flex-col h-screen">
         {/* Navbar */}
         <NavbarProfile page="/" />
@@ -179,7 +178,7 @@ const KelolaUser = () => {
           </div>
         </div>
       </div>
-    </div>
+    </SidebarAdmin>
   );
 };
 

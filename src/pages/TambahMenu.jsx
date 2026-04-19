@@ -65,9 +65,7 @@ const TambahMenu = () => {
   };
 
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen font-sans">
-      <SidebarAdmin />
-
+    <SidebarAdmin title="Tambah Menu">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <NavbarProfile page="/admin/kelola-menu" />
 
@@ -244,7 +242,7 @@ const TambahMenu = () => {
           </div>
         </div>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

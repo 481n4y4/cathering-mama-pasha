@@ -60,7 +60,7 @@ const DetailUser = () => {
   };
 
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen font-sans">
+    <SidebarAdmin title="Detail Pengguna">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <NavbarProfile page="admin/kelola-user" />
 
@@ -183,7 +183,7 @@ const DetailUser = () => {
           </div>
         </div>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

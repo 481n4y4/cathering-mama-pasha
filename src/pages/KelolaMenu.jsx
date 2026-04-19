@@ -56,11 +56,7 @@ const KelolaMenu = () => {
   const menuHabis = menus.filter((m) => m.stok === 0).length;
 
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen font-sans">
-      {/* Sidebar */}
-      <SidebarAdmin />
-
-      {/* Main Content */}
+    <SidebarAdmin title="Kelola Menu">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header Content */}
         <NavbarProfile page="/" />
@@ -261,7 +257,7 @@ const KelolaMenu = () => {
           </div>
         </div>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

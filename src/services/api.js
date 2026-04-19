@@ -82,6 +82,21 @@ export const getAllUsers = async () => {
   }
 };
 
+export const getCart = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/cart", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    throw error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");

@@ -35,11 +35,7 @@ const formatRupiah = (value) => {
 
 const DashboardAdmin = () => {
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen">
-      {/* Sidebar */}
-      <SidebarAdmin />
-
-      {/* Main Content */}
+    <SidebarAdmin title="Dashboard Admin">
       <main className="flex-1">
         <NavbarProfile page="/" />
 
@@ -159,7 +155,7 @@ const DashboardAdmin = () => {
           </div>
         </section>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

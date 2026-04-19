@@ -42,14 +42,10 @@ const NotifAdmin = () => {
   const [activeTab, setActiveTab] = useState("Semua");
 
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen font-sans">
-      {/* Sidebar */}
-      <SidebarAdmin />
-
-      {/* Main Content */}
+    <SidebarAdmin title="Notifikasi">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Navbar */}
-        <NavbarProfile page="/"/>
+        <NavbarProfile page="/" />
 
         {/* Header Title */}
         <div className="px-10 mt-4 shrink-0 flex items-center">
@@ -114,7 +110,7 @@ const NotifAdmin = () => {
           ))}
         </div>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

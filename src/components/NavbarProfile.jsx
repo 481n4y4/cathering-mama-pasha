@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-export default function NavbarProfile({page}) {
+export default function NavbarProfile({ page }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -11,24 +11,32 @@ export default function NavbarProfile({page}) {
 
   const navigation = (page) => {
     navigate(`/${page}`);
-  }
+  };
 
   return (
-    <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40 shadow-md">
-      <button
-        onClick={() => navigation(page)}
-        className="text-text-dark text-2xl hover:opacity-80 transition-opacity"
-      >
-        <i className="fa-solid fa-arrow-left"></i>
-      </button>
+    <div className="hidden lg:block sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+      <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+        <div className="flex justify-start">
+          <button
+            onClick={() => navigation(page)}
+            className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+            aria-label="Kembali"
+          >
+            <i className="fa-solid fa-arrow-left text-text-dark"></i>
+            <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+              Kembali
+            </span>
+          </button>
+        </div>
 
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-bold transition-colors shadow-sm"
-      >
-        <i className="fa-solid fa-right-from-bracket"></i>
-        Logout
-      </button>
+        <div className="flex justify-center">
+          <span className="text-sm lg:text-base font-extrabold text-text-dark">
+            Admin
+          </span>
+        </div>
+
+        
+      </nav>
     </div>
   );
 }

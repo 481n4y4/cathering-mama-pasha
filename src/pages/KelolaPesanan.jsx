@@ -38,11 +38,7 @@ const pesananData = [
 
 const KelolaPesanan = () => {
   return (
-    <div className="flex bg-[#f7c7cd] min-h-screen font-sans">
-      {/* Sidebar */}
-      <SidebarAdmin />
-
-      {/* Main Content */}
+    <SidebarAdmin title="Kelola Pesanan">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Navbar */}
         <NavbarProfile page="/" />
@@ -184,7 +180,7 @@ const KelolaPesanan = () => {
           </div>
         </div>
       </main>
-    </div>
+    </SidebarAdmin>
   );
 };
 

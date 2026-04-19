@@ -13,6 +13,9 @@ import NotifAdmin from "./pages/NotifAdmin.jsx";
 import TambahMenu from "./pages/TambahMenu.jsx";
 import EditMenu from "./pages/EditMenu.jsx";
 import DetailUser from "./pages/DetailUser.jsx";
+import PesananSaya from "./pages/PesananSaya.jsx";
+import Keranjang from "./pages/Keranjang.jsx";
+import Notifikasi from "./pages/Notifikasi.jsx";
 
 export default function App() {
   return (
@@ -24,6 +27,7 @@ export default function App() {
 
         {/* Routes yang butuh login */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/profil" element={<ProfilSaya />} />
           <Route path="/profil/:id" element={<ProfilSaya />} />
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route path="/admin/kelola-menu" element={<KelolaMenu />} />
@@ -33,6 +37,10 @@ export default function App() {
           <Route path="/admin/kelola-menu/tambah" element={<TambahMenu />} />
           <Route path="/admin/kelola-menu/edit/:id" element={<EditMenu />} />
           <Route path="/admin/kelola-user/:id" element={<DetailUser />} />
+          <Route path="/pesanan-saya" element={<PesananSaya />} />
+          <Route path="/keranjang" element={<Keranjang />} />
+          <Route path="/notifikasi" element={<Notifikasi />} />
+
         </Route>
       </Routes>
     </BrowserRouter>
