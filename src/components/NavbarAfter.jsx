@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logoMamaPasha from "../assets/images/logo-kecil.webp";
+import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 export default function NavbarAfter({
   cartCount = 0,
@@ -57,7 +57,7 @@ export default function NavbarAfter({
         {/* ── Kolom 3: Keranjang (rata kanan) ── */}
         <div className="flex justify-end">
           <button
-            onClick={onCartClick || (() => navigate("/keranjang"))}
+            onClick={onCartClick}
             onMouseEnter={() => setHoverCart(true)}
             onMouseLeave={() => setHoverCart(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full px-2.5 py-1 transition-colors duration-200 ${
