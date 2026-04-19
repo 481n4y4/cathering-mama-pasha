@@ -1,5 +1,7 @@
 import { useState } from "react";
-import ProfilLayout from "./ProfilLayout";
+import { useNavigate } from "react-router-dom";
+import ProfilLayout from "../components/ProfilLayout";
+import iconBack from "../assets/images/icon-back.webp";
 
 const formatRp = (n) => "Rp " + n.toLocaleString("id-ID");
 
@@ -121,26 +123,40 @@ function RiwayatPesanan() {
 }
 
 export default function PesananSaya({ onNavigate }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("aktif");
+
+  const handleNavigate = (path) => {
+    if (onNavigate) {
+      onNavigate(path);
+    } else if (path === "beranda") {
+      navigate("/");
+    } else if (path === "profil-saya") {
+      navigate("/profil");
+    } else {
+      navigate(`/${path}`);
+    }
+  };
 
   return (
     <ProfilLayout
       activeMenu="pesanan-saya"
-      onNavigate={onNavigate}
+      onNavigate={handleNavigate}
       title="Pesanan Saya"
-      onBack={() => onNavigate("beranda")}
+      onBack={() => handleNavigate("beranda")}
     >
       {/* Top bar DESKTOP */}
-      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
+      <div className="hidden lg:flex items-center justify-between px-8 py-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => onNavigate("beranda")} className="text-text-dark font-bold text-lg">←</button>
+          <button onClick={() => handleNavigate("beranda")} className="text-text-dark font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity">
+            <img src={iconBack} alt="Back" className="w-6 h-6" />
+          </button>
           <h1 className="text-xl font-extrabold text-text-dark">Pesanan Saya</h1>
         </div>
-        <button className="text-text-dark text-xl">🔍</button>
       </div>
 
       {/* Tab */}
-      <div className="flex border-b border-pink-2/40 bg-white/20">
+      <div className="flex shadow-md shadow-pink-800/20 bg-white/20">
         {[{ key: "aktif", label: "Pesanan Aktif" }, { key: "riwayat", label: "Riwayat Pesanan" }].map(({ key, label }) => (
           <button
             key={key}

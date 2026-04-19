@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logoMamaPasha from "../assets/images/logo-kecil.png";
+import logoMamaPasha from "../assets/images/logo-kecil.webp";
 
 export default function NavbarBefore({
   cartCount = 0,
@@ -14,6 +14,14 @@ export default function NavbarBefore({
   const handleAuthClick = () => {
     if (onAuthClick) {
       onAuthClick();
+      return;
+    }
+    navigate("/auth");
+  };
+
+  const handleCartClick = () => {
+    if (onCartClick) {
+      onCartClick();
       return;
     }
     navigate("/auth");
@@ -52,7 +60,7 @@ export default function NavbarBefore({
 
         <div className="flex justify-end">
           <button
-            onClick={onCartClick}
+            onClick={handleCartClick}
             onMouseEnter={() => setHoverCart(true)}
             onMouseLeave={() => setHoverCart(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full px-2.5 py-1 transition-colors duration-200 ${
