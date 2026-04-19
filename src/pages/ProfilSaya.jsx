@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import EditProfileForm from "../components/EditProfileForm";
 import { getUserById } from "../services/api";
+import logoMamaPasha from "../assets/images/logo-kecil.webp";
 
 export default function ProfilSaya({ onNavigate }) {
   const navigate = useNavigate();
