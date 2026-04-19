@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
+import { useParams } from "react-router-dom"; // Jika menggunakan React Router
 import { getProductById } from "../services/api";
-import logoMamaPasha from "../assets/images/logo-kecil.webp";
-import iconBack from "../assets/images/icon-back.webp";
-import Toast from "../components/Toast";
+import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 /* ── Data ulasan ─────────────────────────────────────────── */
 const ulasan = [
@@ -46,23 +44,11 @@ export default function DetailProduk({
   onKeranjang,
   cartCount = 0,
 }) {
-  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [likes, setLikes] = useState({ 1: false, 2: true });
   const [produk, setProduk] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [toastMessage, setToastMessage] = useState("");
-  const handleBack = onBack || (() => navigate(-1));
-  const handleOpenCart = () => navigate("/keranjang");
-  const handleAddToCart = () => {
-    if (onKeranjang) {
-      onKeranjang(produk, qty);
-    }
-    setToastMessage("Barang berhasil ditambahkan ke keranjang");
-    window.setTimeout(() => setToastMessage(""), 2000);
-  };
-  const handlePesan = onPesan || (() => navigate("/buat-pesanan"));
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
   const { id } = useParams();
@@ -134,10 +120,10 @@ export default function DetailProduk({
       <div className="min-h-screen bg-pink-5 flex flex-col">
         <div className="flex items-center px-4 py-3 bg-white">
           <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-pink-6 font-semibold text-sm"
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
           >
-            <img src={iconBack} alt="Back" className="w-4 h-4" />
+            <span className="text-lg">←</span>
             Kembali
           </button>
         </div>
@@ -164,14 +150,14 @@ export default function DetailProduk({
       {/* ── Top Bar ────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-3 bg-white">
         <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-pink-6 font-semibold text-sm"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
         >
-          <img src={iconBack} alt="Back" className="w-4 h-4" />
+          <span className="text-lg">←</span>
           Detail Produk
         </button>
         <button
-          onClick={handleOpenCart}
+          onClick={onKeranjang}
           className="flex items-center gap-2 bg-pink-6 text-white text-sm font-bold px-4 py-2 rounded-full"
         >
           <span>🛒</span>
@@ -310,17 +296,16 @@ export default function DetailProduk({
       </div>
 
       {/* ── Bottom Bar (fixed) ──────────────────────────────── */}
-      <Toast message={toastMessage} />
       <div className="fixed bottom-0 left-0 right-0 flex gap-3 px-4 py-3 bg-pink-6">
         <button
-          onClick={handleAddToCart}
+          onClick={() => onKeranjang && onKeranjang(produk, qty)}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
           disabled={produk.stok === 0}
         >
           + Keranjang
         </button>
         <button
-          onClick={() => handlePesan(produk, qty)}
+          onClick={() => onPesan && onPesan(produk, qty)}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
           disabled={produk.stok === 0}
         >
