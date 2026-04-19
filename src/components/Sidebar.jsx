@@ -5,7 +5,7 @@ import { useState } from "react";
   - HP      : tidak ada sidebar, navigasi via bottom tab bar
   - Desktop : sidebar kiri fixed + konten kanan
 */
-export default function ProfilLayout({ activeMenu, onNavigate, children, title, onBack }) {
+export default function Sidebar({ activeMenu, onNavigate, children, title, onBack }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const menus = [
