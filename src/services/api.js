@@ -189,10 +189,11 @@ export const createProduct = async (productData) => {
 export const updateProduct = async (id, productData) => {
   try {
     const token = localStorage.getItem("token");
+    const isFormData = productData instanceof FormData;
     const response = await api.put(`/api/products/${id}`, productData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
+        "Content-Type": isFormData ? "multipart/form-data" : "application/json",
       },
     });
     return response.data;

@@ -72,14 +72,21 @@ const EditMenu = () => {
     setSuccess(false);
 
     try {
-      const submitData = new FormData();
-      submitData.append("nama_produk", formData.nama_produk);
-      submitData.append("harga", formData.harga);
-      submitData.append("kategori", formData.kategori);
+      let submitData;
+
       if (formData.image) {
+        submitData = new FormData();
+        submitData.append("nama_produk", formData.nama_produk);
+        submitData.append("harga", formData.harga);
+        submitData.append("kategori", formData.kategori);
         submitData.append("image", formData.image);
       } else {
-        submitData.append("image", "-");
+        submitData = {
+          nama_produk: formData.nama_produk,
+          harga: Number(formData.harga),
+          kategori: formData.kategori,
+          image: previewImage || "-",
+        };
       }
 
       await updateProduct(id, submitData);
