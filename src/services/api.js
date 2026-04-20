@@ -172,10 +172,11 @@ export const checkCheckoutDate = async ({ tanggal_pengiriman }) => {
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");
+    const isFormData = productData instanceof FormData;
     const response = await api.post("/api/products", productData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
+        "Content-Type": isFormData ? "multipart/form-data" : "application/json",
       },
     });
     return response.data;

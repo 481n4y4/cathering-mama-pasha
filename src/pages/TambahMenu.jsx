@@ -15,7 +15,6 @@ const TambahMenu = () => {
     nama_produk: "",
     harga: "",
     kategori: "Makanan",
-    stok: "",
     image: null,
   });
 
@@ -34,6 +33,28 @@ const TambahMenu = () => {
     }
   };
 
+  const uploadToCloudinary = async (file) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: form,
+      },
+    );
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody?.error?.message || "Upload gambar gagal.");
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -41,24 +62,27 @@ const TambahMenu = () => {
     setSuccess(false);
 
     try {
-      // Menggunakan FormData karena terdapat file (image) yang perlu diupload ke Cloudinary melalui backend
-      const submitData = new FormData();
-      submitData.append("nama_produk", formData.nama_produk);
-      submitData.append("harga", formData.harga);
-      submitData.append("kategori", formData.kategori);
-      submitData.append("stok", formData.stok);
-      if (formData.image) {
-        submitData.append("image", formData.image);
-      }
+      const imageUrl = formData.image
+        ? await uploadToCloudinary(formData.image)
+        : "-";
+      const submitData = {
+        nama_produk: formData.nama_produk,
+        harga: Number(formData.harga),
+        kategori: formData.kategori,
+        image: imageUrl,
+      };
 
       await createProduct(submitData);
       setSuccess(true);
-      setTimeout(() => navigate("/admin/menu"), 2000);
+      setTimeout(() => navigate("/admin/kelola-menu"), 2000);
     } catch (err) {
       console.error(err);
-      setError(
-        "Gagal menambahkan menu. Periksa kembali data atau koneksi Anda.",
-      );
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Gagal menambahkan menu. Periksa kembali data atau koneksi Anda.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -73,7 +97,7 @@ const TambahMenu = () => {
           <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-8">
             <div className="flex items-center gap-4 border-b pb-6 mb-8">
               <button
-                onClick={() => navigate("/admin/menu")}
+                onClick={() => navigate("/admin/kelola-menu")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
               >
                 <ArrowLeft className="w-6 h-6" />
@@ -192,23 +216,6 @@ const TambahMenu = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e96481] focus:border-transparent transition-all"
                     placeholder="Contoh: 25000"
-                    min="0"
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="stok" className="font-semibold text-gray-700">
-                    Stok
-                  </label>
-                  <input
-                    type="number"
-                    id="stok"
-                    name="stok"
-                    value={formData.stok}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e96481] focus:border-transparent transition-all"
-                    placeholder="Contoh: 100"
                     min="0"
                     required
                   />

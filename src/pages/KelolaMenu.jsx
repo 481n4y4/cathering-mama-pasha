@@ -50,10 +50,7 @@ const KelolaMenu = () => {
     fetchMenus();
   }, []);
 
-  // Hitung statistik
   const totalMenu = menus.length;
-  const menuTersedia = menus.filter((m) => m.stok > 0).length;
-  const menuHabis = menus.filter((m) => m.stok === 0).length;
 
   return (
     <SidebarAdmin title="Kelola Menu">
@@ -71,22 +68,6 @@ const KelolaMenu = () => {
               </span>
               <span className="text-4xl font-extrabold text-black">
                 {totalMenu}
-              </span>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col w-48 border-2 border-white hover:border-pink-200 transition-colors">
-              <span className="text-sm font-semibold text-gray-800 mb-2">
-                Menu Tersedia
-              </span>
-              <span className="text-4xl font-extrabold text-black">
-                {menuTersedia}
-              </span>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col w-48 border-2 border-white hover:border-pink-200 transition-colors">
-              <span className="text-sm font-semibold text-gray-800 mb-2">
-                Menu Habis
-              </span>
-              <span className="text-4xl font-extrabold text-black">
-                {menuHabis}
               </span>
             </div>
 
@@ -131,12 +112,6 @@ const KelolaMenu = () => {
                       Nama Menu
                     </th>
                     <th className="py-4 px-6 font-bold text-black">Harga</th>
-                    <th className="py-4 px-6 font-bold text-black text-center">
-                      Stok
-                    </th>
-                    <th className="py-4 px-6 font-bold text-black text-center">
-                      Status
-                    </th>
                     <th className="py-4 px-6 font-bold text-black text-center rounded-r-lg">
                       Aksi
                     </th>
@@ -146,7 +121,7 @@ const KelolaMenu = () => {
                   {loading ? (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="4"
                         className="py-5 px-6 text-center font-bold text-gray-500"
                       >
                         Memuat data...
@@ -155,7 +130,7 @@ const KelolaMenu = () => {
                   ) : error ? (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="4"
                         className="py-5 px-6 text-center font-bold text-red-500"
                       >
                         {error}
@@ -175,20 +150,6 @@ const KelolaMenu = () => {
                         </td>
                         <td className="py-5 px-6 font-bold text-black">
                           {formatRupiah(item.harga)}
-                        </td>
-                        <td className="py-5 px-6 font-bold text-black text-center">
-                          {item.stok}
-                        </td>
-                        <td className="py-5 px-6 text-center">
-                          <span
-                            className={`py-1.5 px-4 rounded-full text-sm font-bold inline-block min-w-[100px] ${
-                              item.stok > 0
-                                ? "bg-[#bbf2c8] text-[#2c7847]" // Hijau (Tersedia)
-                                : "bg-[#f2bbbb] text-[#a82b2b]" // Merah (Habis)
-                            }`}
-                          >
-                            {item.stok > 0 ? "Tersedia" : "Habis"}
-                          </span>
                         </td>
                         <td className="py-5 px-6">
                           <div className="flex items-center justify-center gap-3">
@@ -215,7 +176,7 @@ const KelolaMenu = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="4"
                         className="py-5 px-6 text-center font-bold text-gray-500"
                       >
                         Belum ada data menu.

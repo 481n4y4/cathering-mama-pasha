@@ -61,19 +61,23 @@ const KelolaUser = () => {
             </div>
 
             {/* Table */}
-            <div className="flex-1 overflow-auto px-8 py-2">
+            <div className="flex-1 overflow-auto px-8 pb-2">
               <table className="w-full text-left border-collapse min-w-max">
-                <thead className="bg-[#f3e3d2] sticky top-0 z-10">
+                <thead className="bg-[#f3e3d2] sticky top-0 z-20">
                   <tr>
-                    <th className="py-4 px-6 font-bold text-black rounded-l-lg">
+                    <th className="py-4 px-6 font-bold text-black rounded-l-lg bg-[#f3e3d2]">
                       No
                     </th>
-                    <th className="py-4 px-6 font-bold text-black">Nama</th>
-                    <th className="py-4 px-6 font-bold text-black text-center">
+                    <th className="py-4 px-6 font-bold text-black bg-[#f3e3d2]">
+                      Nama
+                    </th>
+                    <th className="py-4 px-6 font-bold text-black text-center bg-[#f3e3d2]">
                       No HP
                     </th>
-                    <th className="py-4 px-6 font-bold text-black">Alamat</th>
-                    <th className="py-4 px-6 font-bold text-black text-center rounded-r-lg">
+                    <th className="py-4 px-6 font-bold text-black bg-[#f3e3d2]">
+                      Alamat
+                    </th>
+                    <th className="py-4 px-6 font-bold text-black text-center rounded-r-lg bg-[#f3e3d2]">
                       Aksi
                     </th>
                   </tr>

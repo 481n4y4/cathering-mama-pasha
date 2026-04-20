@@ -18,7 +18,6 @@ const EditMenu = () => {
     nama_produk: "",
     harga: "",
     kategori: "Makanan",
-    stok: "",
     image: null,
   });
 
@@ -34,7 +33,6 @@ const EditMenu = () => {
             nama_produk: product.nama_produk || "",
             harga: product.harga || "",
             kategori: product.kategori || "Makanan",
-            stok: product.stok !== undefined ? product.stok : "",
             image: null,
           });
           if (product.image && product.image !== "-") {
@@ -78,7 +76,6 @@ const EditMenu = () => {
       submitData.append("nama_produk", formData.nama_produk);
       submitData.append("harga", formData.harga);
       submitData.append("kategori", formData.kategori);
-      submitData.append("stok", formData.stok);
       if (formData.image) {
         submitData.append("image", formData.image);
       } else {
@@ -87,7 +84,7 @@ const EditMenu = () => {
 
       await updateProduct(id, submitData);
       setSuccess(true);
-      setTimeout(() => navigate("/admin/menu"), 2000);
+      setTimeout(() => navigate("/admin/kelola-menu"), 2000);
     } catch (err) {
       console.error(err);
       setError("Gagal mengubah menu. Periksa kembali data atau koneksi Anda.");
@@ -222,26 +219,6 @@ const EditMenu = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e96481] focus:border-transparent transition-all"
                       placeholder="Contoh: 25000"
-                      min="0"
-                      required
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="stok"
-                      className="font-semibold text-gray-700"
-                    >
-                      Stok
-                    </label>
-                    <input
-                      type="number"
-                      id="stok"
-                      name="stok"
-                      value={formData.stok}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e96481] focus:border-transparent transition-all"
-                      placeholder="Contoh: 100"
                       min="0"
                       required
                     />

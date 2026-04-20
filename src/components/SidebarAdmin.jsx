@@ -1,6 +1,13 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { BarChart3, List, Users, ShoppingCart, Bell } from "lucide-react";
+import {
+  BarChart3,
+  List,
+  Users,
+  ShoppingCart,
+  Bell,
+  UserCircle,
+} from "lucide-react";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
@@ -13,6 +20,12 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
       label: "Statistik",
       path: "/admin/statistik",
       Icon: BarChart3,
+    },
+    {
+      key: "profil",
+      label: "Profil Admin",
+      path: "/admin/profil",
+      Icon: UserCircle,
     },
     {
       key: "kelola-menu",

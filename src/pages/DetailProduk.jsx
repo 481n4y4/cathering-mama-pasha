@@ -116,8 +116,13 @@ export default function DetailProduk({
             rating: response.data.rating || 4.5, // Default rating jika tidak ada
             deskripsi:
               response.data.deskripsi || "Deskripsi produk belum tersedia",
+            image:
+              response.data.image ||
+              response.data.image_url ||
+              response.data.foto ||
+              response.data.foto_produk ||
+              "",
             emoji: response.data.emoji || "🥟", // Default emoji jika tidak ada
-            stok: response.data.stok,
             kategori: response.data.kategori,
           };
           setProduk(productData);
@@ -244,7 +249,18 @@ export default function DetailProduk({
       <div className="flex-1 overflow-y-auto pb-28">
         {/* Foto produk */}
         <div className="w-full h-56 lg:h-120 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
-          {produk.emoji}
+          {produk.image ? (
+            <img
+              src={produk.image}
+              alt={produk.nama}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <span>{produk.emoji}</span>
+          )}
         </div>
 
         {/* Info produk */}
@@ -279,13 +295,6 @@ export default function DetailProduk({
             </span>
           </div>
 
-          {/* Stok info (optional) */}
-          {produk.stok !== undefined && (
-            <p className="text-xs text-gray-500 mb-2">
-              Stok: {produk.stok} tersisa
-            </p>
-          )}
-
           {/* Harga */}
           <p className="text-2xl lg:text-3xl font-extrabold text-pink-6 mb-3">
             Rp{produk.harga.toLocaleString("id-ID")}
@@ -301,7 +310,6 @@ export default function DetailProduk({
             <button
               onClick={() => setQty((n) => Math.max(1, n - 1))}
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
-              disabled={produk.stok === 0}
             >
               −
             </button>
@@ -309,18 +317,12 @@ export default function DetailProduk({
               {qty}
             </div>
             <button
-              onClick={() =>
-                setQty((n) => Math.min(n + 1, produk.stok || Infinity))
-              }
+              onClick={() => setQty((n) => n + 1)}
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
-              disabled={produk.stok === 0}
             >
               +
             </button>
           </div>
-          {produk.stok === 0 && (
-            <p className="text-red-500 text-xs text-right mt-1">Stok habis</p>
-          )}
         </div>
 
         {/* ── Ulasan ─────────────────────────────────────────── */}
@@ -370,14 +372,12 @@ export default function DetailProduk({
         <button
           onClick={handleAddToCart}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
-          disabled={produk.stok === 0}
         >
           + Keranjang
         </button>
         <button
           onClick={handlePesanSekarang}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
-          disabled={produk.stok === 0}
         >
           Pesan Sekarang
         </button>
