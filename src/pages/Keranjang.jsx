@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
-import { getCart } from "../services/api";
+import { getCart, removeCartItem, updateCartItem } from "../services/api";
 
 const formatRp = (value) => `Rp ${value.toLocaleString("id-ID")}`;
 
@@ -90,6 +90,32 @@ export default function Keranjang({ onNavigate }) {
     navigate("/buat-pesanan", { state: { selectedIds } });
   };
 
+  const handleUpdateQty = async (itemId, nextQty) => {
+    if (nextQty < 1) return;
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId ? { ...item, qty: nextQty } : item,
+      ),
+    );
+    try {
+      await updateCartItem({ itemId, kuantitas: nextQty });
+    } catch (err) {
+      console.error(err);
+      setError("Gagal mengubah jumlah item.");
+    }
+  };
+
+  const handleRemoveItem = async (itemId) => {
+    setItems((current) => current.filter((item) => item.id !== itemId));
+    setSelectedIds((current) => current.filter((id) => id !== itemId));
+    try {
+      await removeCartItem({ itemId });
+    } catch (err) {
+      console.error(err);
+      setError("Gagal menghapus item keranjang.");
+    }
+  };
+
   return (
     <ProfilLayout
       activeMenu="keranjang"
@@ -97,16 +123,27 @@ export default function Keranjang({ onNavigate }) {
       title="Keranjang"
       onBack={() => handleNavigate("beranda")}
     >
-      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleNavigate("beranda")}
-            className="text-text-dark font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity"
-            aria-label="Kembali"
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-          </button>
-          <h1 className="text-xl font-extrabold text-text-dark">Keranjang</h1>
+      {/* ══ Top bar DESKTOP ══ */}
+      <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+          <div className="flex justify-start">
+            <button
+              onClick={() => handleNavigate("beranda")}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left text-text-dark"></i>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Kembali
+              </span>
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <span className="text-sm lg:text-base font-extrabold text-text-dark">
+              Keranjang
+            </span>
+          </div>
+          <div className="flex justify-end" />
         </div>
       </div>
 
@@ -173,13 +210,38 @@ export default function Keranjang({ onNavigate }) {
                       <p className="font-extrabold text-text-dark text-sm lg:text-base">
                         {item.name}
                       </p>
-                      <p className="text-sm font-bold text-pink-6">
-                        {formatRp(item.price)}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-pink-6">
+                          {formatRp(item.price)}
+                        </p>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-[11px] font-bold border border-pink-2 text-text-dark px-2.5 py-1 rounded-full hover:bg-pink-5 active:scale-95 transition-all"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </div>
                     <p className="text-xs text-text-mid mt-1">
                       Jumlah: {item.qty}
                     </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => handleUpdateQty(item.id, item.qty - 1)}
+                        className="w-8 h-8 rounded-full border border-pink-2 text-text-dark font-bold flex items-center justify-center hover:bg-pink-5"
+                      >
+                        −
+                      </button>
+                      <span className="text-sm font-bold text-text-dark min-w-6 text-center">
+                        {item.qty}
+                      </span>
+                      <button
+                        onClick={() => handleUpdateQty(item.id, item.qty + 1)}
+                        className="w-8 h-8 rounded-full border border-pink-2 text-text-dark font-bold flex items-center justify-center hover:bg-pink-5"
+                      >
+                        +
+                      </button>
+                    </div>
                     <p className="text-xs text-text-mid mt-2">
                       Total:{" "}
                       <span className="font-semibold text-text-dark">

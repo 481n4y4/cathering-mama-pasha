@@ -97,6 +97,59 @@ export const getCart = async () => {
   }
 };
 
+export const addToCart = async ({ produkId, kuantitas }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      "/api/cart/add",
+      { produkId, kuantitas },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const updateCartItem = async ({ itemId, kuantitas }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.put(
+      `/api/cart/update/${itemId}`,
+      { kuantitas },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating cart item:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const removeCartItem = async ({ itemId }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/api/cart/remove/${itemId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error removing cart item:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");

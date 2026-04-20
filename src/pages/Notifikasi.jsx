@@ -80,17 +80,27 @@ export default function Notifikasi({ onNavigate }) {
       title="Notifikasi"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* Top bar DESKTOP */}
-      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleNavigate("beranda")}
-            className="text-text-dark font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity"
-            aria-label="Kembali"
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-          </button>
-          <h1 className="text-xl font-extrabold text-text-dark">Notifikasi</h1>
+      {/* ══ Top bar DESKTOP ══ */}
+      <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+          <div className="flex justify-start">
+            <button
+              onClick={() => handleNavigate("beranda")}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left text-text-dark"></i>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Kembali
+              </span>
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <span className="text-sm lg:text-base font-extrabold text-text-dark">
+              Notifikasi
+            </span>
+          </div>
+          <div className="flex justify-end" />
         </div>
       </div>
 

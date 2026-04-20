@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Jika menggunakan React Router
-import { getProductById } from "../services/api";
+import { useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
+import { addToCart, getProductById } from "../services/api";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 /* ── Data ulasan ─────────────────────────────────────────── */
@@ -49,6 +49,7 @@ export default function DetailProduk({
   const [produk, setProduk] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
   const { id } = useParams();
@@ -57,6 +58,25 @@ export default function DetailProduk({
   // const { productId } = props;
 
   const toggleLike = (id) => setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    navigate("/");
+  };
+
+  const handleAddToCart = async () => {
+    if (!produk?.id) return;
+    try {
+      await addToCart({ produkId: produk.id, kuantitas: qty });
+      navigate("/keranjang");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menambahkan ke keranjang. Coba lagi.");
+    }
+  };
 
   // Fetch data produk saat component mount atau ID berubah
   useEffect(() => {
@@ -118,14 +138,27 @@ export default function DetailProduk({
   if (error || !produk) {
     return (
       <div className="min-h-screen bg-pink-5 flex flex-col">
-        <div className="flex items-center px-4 py-3 bg-white">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
-          >
-            <span className="text-lg">←</span>
-            Kembali
-          </button>
+        <div className="sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+          <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+            <div className="flex justify-start">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+                aria-label="Kembali"
+              >
+                <i className="fa-solid fa-arrow-left text-text-dark"></i>
+                <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                  Kembali
+                </span>
+              </button>
+            </div>
+            <div className="flex justify-center">
+              <span className="text-sm lg:text-base font-extrabold text-text-dark">
+                Detail Produk
+              </span>
+            </div>
+            <div className="flex justify-end" />
+          </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center p-6">
@@ -134,7 +167,7 @@ export default function DetailProduk({
               {error || "Produk tidak ditemukan"}
             </p>
             <button
-              onClick={onBack}
+              onClick={handleBack}
               className="bg-pink-6 text-white px-6 py-2 rounded-full"
             >
               Kembali ke Beranda
@@ -148,32 +181,48 @@ export default function DetailProduk({
   return (
     <div className="min-h-screen bg-pink-5 flex flex-col">
       {/* ── Top Bar ────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
-        >
-          <span className="text-lg">←</span>
-          Detail Produk
-        </button>
-        <button
-          onClick={onKeranjang}
-          className="flex items-center gap-2 bg-pink-6 text-white text-sm font-bold px-4 py-2 rounded-full"
-        >
-          <span>🛒</span>
-          Keranjang
-          {cartCount > 0 && (
-            <span className="bg-white text-pink-6 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
-              {cartCount}
+      <div className="absolute top-0 left-0 right-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+          <div className="flex justify-start">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left text-text-dark"></i>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Kembali
+              </span>
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <span className="text-sm lg:text-base font-extrabold text-text-dark">
+              Detail Produk
             </span>
-          )}
-        </button>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={onKeranjang}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+            >
+              <span className="text-sm lg:text-base">🛒</span>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Keranjang
+              </span>
+              {cartCount > 0 && (
+                <span className="bg-pink-6 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-28">
         {/* Foto produk */}
-        <div className="w-full h-56 lg:h-72 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
+        <div className="w-full h-56 lg:h-120 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
           {produk.emoji}
         </div>
 
@@ -298,7 +347,7 @@ export default function DetailProduk({
       {/* ── Bottom Bar (fixed) ──────────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 flex gap-3 px-4 py-3 bg-pink-6">
         <button
-          onClick={() => onKeranjang && onKeranjang(produk, qty)}
+          onClick={handleAddToCart}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
           disabled={produk.stok === 0}
         >

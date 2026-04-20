@@ -21,6 +21,10 @@ export default function NavbarAfter({
     }
   };
 
+  const handleCartClick = () => {
+    navigate("/keranjang");
+  };
+
   return (
     <div className="sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
       <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-3 bg-white rounded-full border border-pink-2 shadow-nav">
@@ -57,7 +61,7 @@ export default function NavbarAfter({
         {/* ── Kolom 3: Keranjang (rata kanan) ── */}
         <div className="flex justify-end">
           <button
-            onClick={onCartClick}
+            onClick={handleCartClick}
             onMouseEnter={() => setHoverCart(true)}
             onMouseLeave={() => setHoverCart(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full px-2.5 py-1 transition-colors duration-200 ${

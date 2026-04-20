@@ -235,16 +235,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🔥 Promo", key: "Promo" },
   ];
 
-  const handleLogout = () => {
-    // Hapus sesi dari local storage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userId");
-
-    // Perbarui state dan pancarkan event
-    setIsLoggedIn(false);
-    window.dispatchEvent(new Event("auth-changed"));
-  };
 
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
 
@@ -268,18 +258,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     <main>
       <ActiveNavbar />
       <section className="w-full max-w-[500px] lg:max-w-[860px] mx-auto px-4 lg:px-10 pt-7 pb-16">
-        {/* ── Tombol Logout ────────────────────────────────────── */}
-        {isLoggedIn && (
-          <div className="flex justify-end mb-2 animate-fade-up">
-            <button
-              onClick={handleLogout}
-              className="text-xs lg:text-sm font-bold text-pink-6 bg-white border border-pink-2 rounded-full px-5 py-1.5 hover:bg-pink-6 hover:text-white hover:border-pink-6 transition-all shadow-sm"
-            >
-              Keluar (Logout)
-            </button>
-          </div>
-        )}
-
         {/* ── Greeting ─────────────────────────────────────────── */}
         <div className="text-center mb-5 animate-fade-up">
           <h1 className="font-script text-pink-6 font-bold leading-tight text-[34px] lg:text-5xl">
@@ -289,14 +267,12 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             Mau makan enak hari ini?
           </p>
         </div>
-
         {/* ── Error Message ───────────────────────────────────── */}
         {error && (
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
             ⚠️ {error}
           </div>
         )}
-
         {/* ── Search Bar ───────────────────────────────────────── */}
         <div className="relative mb-4">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-text-mid">
@@ -310,7 +286,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             className="w-full pl-11 pr-4 py-3 lg:py-3.5 rounded-full border-2 border-pink-2 bg-white text-sm lg:text-base text-text-dark placeholder:text-text-mid focus:border-pink-3 transition-colors"
           />
         </div>
-
         {/* ── Category Tabs ────────────────────────────────────── */}
         <div className="flex items-center justify-center gap-2.5 mb-5">
           {tabs.map(({ label, key }) => (
@@ -327,7 +302,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             </button>
           ))}
         </div>
-
         {/* ── Banner Diskon ─────────────────────────────────────── */}
         <div className="relative overflow-hidden rounded-2xl bg-pink-6 px-6 lg:px-10 py-5 lg:py-8 flex items-center justify-between mb-7">
           {/* Dekorasi lingkaran */}
@@ -355,7 +329,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             🍱
           </span>
         </div>
-
         {/* ── Section: Rekomendasi ──────────────────────────────── */}
         <div className="flex items-center justify-between mb-3.5">
           <span className="text-[15px] lg:text-lg font-extrabold text-text-dark">
@@ -365,7 +338,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             Lihat Semua
           </button>
         </div>
-
         {/* Grid: 3 kolom HP → 4 kolom desktop */}
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
           {filtered
@@ -382,7 +354,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
               />
             ))}
         </div>
-
         {/* ── Tentang Kami ─────────────────────────────────────── */}
         <div className="bg-white rounded-2xl border-2 border-pink-1 shadow-card flex items-center gap-4 lg:gap-8 p-5 lg:p-8">
           {/* Teks */}
