@@ -70,7 +70,6 @@ const LoginForm = () => {
         window.dispatchEvent(new Event("auth-changed"));
 
         alert("Login berhasil!");
-        // Redirect to dashboard
         navigate("/");
       } else {
         setError(

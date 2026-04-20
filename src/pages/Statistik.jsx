@@ -35,13 +35,13 @@ const formatRupiah = (value) => {
 
 const DashboardAdmin = () => {
   return (
-    <SidebarAdmin title="Dashboard Admin">
+    <SidebarAdmin title="Statistik">
       <main className="flex-1">
         <NavbarProfile page="/" />
 
         <section className="py-5 px-10 overflow-auto">
           <h1 className="text-3xl font-semibold mb-12 text-gray-900">
-            Dashboard Admin
+            Statistik
           </h1>
 
           {/* Info Cards */}

@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, List, Users, ShoppingCart, Bell } from "lucide-react";
+import { BarChart3, List, Users, ShoppingCart, Bell } from "lucide-react";
+import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
   const navigate = useNavigate();
@@ -8,10 +9,10 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
 
   const menus = [
     {
-      key: "dashboard",
-      label: "Dashboard",
-      path: "/admin/dashboard",
-      Icon: Home,
+      key: "statistik",
+      label: "Statistik",
+      path: "/admin/statistik",
+      Icon: BarChart3,
     },
     {
       key: "kelola-menu",
@@ -60,7 +61,7 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
       onBack();
       return;
     }
-    navigate("/admin/dashboard");
+    navigate("/admin/statistik");
   };
 
   return (
@@ -89,8 +90,8 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
             }}
           >
             <img
-              src="https://i.pravatar.cc/150?img=47"
-              alt="Admin Profile"
+              src={logoMamaPasha}
+              alt="Logo Mama Pasha's Treats"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>

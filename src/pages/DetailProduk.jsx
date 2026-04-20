@@ -49,6 +49,7 @@ export default function DetailProduk({
   const [produk, setProduk] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddSuccess, setShowAddSuccess] = useState(false);
   const navigate = useNavigate();
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
@@ -71,6 +72,18 @@ export default function DetailProduk({
     if (!produk?.id) return;
     try {
       await addToCart({ produkId: produk.id, kuantitas: qty });
+      setShowAddSuccess(true);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menambahkan ke keranjang. Coba lagi.");
+    }
+  };
+
+  const handlePesanSekarang = async () => {
+    if (!produk?.id) return;
+    try {
+      await addToCart({ produkId: produk.id, kuantitas: qty });
+      setShowAddSuccess(true);
       navigate("/keranjang");
     } catch (err) {
       console.error(err);
@@ -121,6 +134,14 @@ export default function DetailProduk({
 
     fetchProduct();
   }, [id]); // atau [props.productId]
+
+  useEffect(() => {
+    if (!showAddSuccess) return undefined;
+    const timeoutId = setTimeout(() => {
+      setShowAddSuccess(false);
+    }, 1600);
+    return () => clearTimeout(timeoutId);
+  }, [showAddSuccess]);
 
   // Tampilkan loading state
   if (loading) {
@@ -202,7 +223,7 @@ export default function DetailProduk({
           </div>
           <div className="flex justify-end">
             <button
-              onClick={onKeranjang}
+              onClick={() => navigate("/keranjang")}
               className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
             >
               <span className="text-sm lg:text-base">🛒</span>
@@ -354,13 +375,42 @@ export default function DetailProduk({
           + Keranjang
         </button>
         <button
-          onClick={() => onPesan && onPesan(produk, qty)}
+          onClick={handlePesanSekarang}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
           disabled={produk.stok === 0}
         >
           Pesan Sekarang
         </button>
       </div>
+
+      {showAddSuccess && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: "rgba(184,68,94,0.35)",
+            backdropFilter: "blur(6px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddSuccess(false);
+          }}
+        >
+          <div className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl text-center">
+            <div className="text-4xl mb-2">✅</div>
+            <p className="text-base font-extrabold text-pink-6">
+              Berhasil ditambahkan
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Item sudah masuk ke keranjang.
+            </p>
+            <button
+              onClick={() => setShowAddSuccess(false)}
+              className="mt-4 w-full bg-pink-6 text-white font-bold text-sm py-3 rounded-full"
+            >
+              Oke
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

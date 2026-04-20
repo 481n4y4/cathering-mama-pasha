@@ -150,6 +150,25 @@ export const removeCartItem = async ({ itemId }) => {
   }
 };
 
+export const checkCheckoutDate = async ({ tanggal_pengiriman }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      "/api/orders/checkout",
+      { tanggal_pengiriman },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error checking checkout date:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");

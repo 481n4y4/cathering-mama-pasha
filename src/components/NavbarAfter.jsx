@@ -12,6 +12,20 @@ export default function NavbarAfter({
   const navigate = useNavigate();
 
   const handleProfilClick = () => {
+    const rawUser = localStorage.getItem("user");
+    const userData = rawUser
+      ? (() => {
+          try {
+            return JSON.parse(rawUser);
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+    if (userData?.role === "admin") {
+      navigate("/admin/statistik");
+      return;
+    }
     const userId = localStorage.getItem("userId");
     if (userId) {
       navigate(`/profil/${userId}`);

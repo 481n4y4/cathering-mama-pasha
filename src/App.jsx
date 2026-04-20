@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import DetailProduk from "./pages/DetailProduk.jsx";
 import ProfilSaya from "./pages/ProfilSaya.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import DashboardAdmin from "./pages/DashboardAdmin.jsx";
+import Statistik from "./pages/Statistik.jsx";
 import KelolaMenu from "./pages/KelolaMenu.jsx";
 import KelolaUser from "./pages/KelolaUser.jsx";
 import KelolaPesanan from "./pages/KelolaPesanan.jsx";
@@ -30,7 +30,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/profil" element={<ProfilSaya />} />
           <Route path="/profil/:id" element={<ProfilSaya />} />
-          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+          <Route path="/admin/statistik" element={<Statistik />} />
           <Route path="/admin/kelola-menu" element={<KelolaMenu />} />
           <Route path="/admin/kelola-user" element={<KelolaUser />} />
           <Route path="/admin/kelola-pesanan" element={<KelolaPesanan />} />
@@ -42,7 +42,6 @@ export default function App() {
           <Route path="/keranjang" element={<Keranjang />} />
           <Route path="/notifikasi" element={<Notifikasi />} />
           <Route path="/buat-pesanan" element={<BuatPesanan />} />
-
         </Route>
       </Routes>
     </BrowserRouter>
