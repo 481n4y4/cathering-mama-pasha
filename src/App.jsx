@@ -14,10 +14,10 @@ import NotifAdmin from "./pages/NotifAdmin.jsx";
 import TambahMenu from "./pages/TambahMenu.jsx";
 import EditMenu from "./pages/EditMenu.jsx";
 import DetailUser from "./pages/DetailUser.jsx";
-import PesananSaya from "./pages/PesananSaya.jsx";
-import Keranjang from "./pages/Keranjang.jsx";
+import PesananSaya from "./components/PesananSaya.jsx";
+import Keranjang from "./components/Keranjang.jsx";
 import Notifikasi from "./pages/Notifikasi.jsx";
-import BuatPesanan from "./pages/BuatPesanan.jsx";
+import BuatPesanan from "./components/BuatPesanan.jsx";
 
 export default function App() {
   return (
