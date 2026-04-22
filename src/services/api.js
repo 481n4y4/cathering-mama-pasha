@@ -47,7 +47,7 @@ export const getProductById = async (id) => {
     const response = await api.get(`/api/products/${id}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching product with id ${id}:`, error);
+    console.error("Error fetching product:", { id, error });
     throw error;
   }
 };
@@ -62,7 +62,7 @@ export const getUserById = async (id) => {
     });
     return response.data;
   } catch (error) {
-    console.error(`Error fetching user with id ${id}:`, error);
+    console.error("Error fetching user:", { id, error });
     throw error;
   }
 };

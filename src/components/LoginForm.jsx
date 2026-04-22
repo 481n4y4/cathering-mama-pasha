@@ -27,24 +27,12 @@ const LoginForm = () => {
 
   const handleLoginSubmit = (e) => {
     e.preventDefault()
-    console.log('Login submitted:', {
-      email: formData.email,
-      password: formData.password,
-      rememberPassword: formData.rememberPassword
-    })
-    alert('Login berhasil! Cek console untuk detail.')
+    alert('Login berhasil!')
   }
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault()
-    console.log('Register submitted:', {
-      nama: formData.nama,
-      email: formData.emailRegister,
-      password: formData.passwordRegister,
-      noTelepon: formData.noTelepon,
-      alamat: formData.alamat
-    })
-    alert('Pendaftaran berhasil! Cek console untuk detail.')
+    alert('Pendaftaran berhasil!')
   }
 
   return (
