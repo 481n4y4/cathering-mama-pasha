@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../services/api";
-import loginImg from '../assets/images/image-login.webp';
 
 const LoginForm = () => {
   const [activeTab, setActiveTab] = useState("masuk");
@@ -71,7 +70,6 @@ const LoginForm = () => {
         window.dispatchEvent(new Event("auth-changed"));
 
         alert("Login berhasil!");
-        // Redirect to dashboard
         navigate("/");
       } else {
         setError(
@@ -436,7 +434,7 @@ function LoginPage() {
       <div className="bg-[#F0B3C5] hidden md:flex items-center justify-center p-8">
         <div className="max-w-[450px] lg:max-w-[550px] w-full">
           <img
-            src={loginImg}
+            src="/src/assets/images/image-login.png"
             alt="Chef cooking illustration"
             className="w-full h-auto object-contain drop-shadow-xl"
           />

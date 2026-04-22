@@ -1,25 +1,58 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
- 
-export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
+
+export default function NavbarAfter({
+  cartCount = 0,
+  onCartClick,
+  onProfilClick,
+}) {
   const [hoverProfile, setHoverProfile] = useState(false);
-  const [hoverCart, setHoverCart]       = useState(false);
+  const [hoverCart, setHoverCart] = useState(false);
+  const navigate = useNavigate();
+
+  const handleProfilClick = () => {
+    const rawUser = localStorage.getItem("user");
+    const userData = rawUser
+      ? (() => {
+          try {
+            return JSON.parse(rawUser);
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+    if (userData?.role === "admin") {
+      navigate("/admin/statistik");
+      return;
+    }
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      navigate(`/profil/${userId}`);
+    } else {
+      // Jika tidak ada user ID, arahkan kembali ke login/auth
+      navigate("/auth");
+    }
+  };
+
+  const handleCartClick = () => {
+    navigate("/keranjang");
+  };
 
   return (
     <div className="sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
       <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-3 bg-white rounded-full border border-pink-2 shadow-nav">
-
         {/* ── Kolom 1: Profil (rata kiri) ── */}
         <div className="flex justify-start">
           <button
-            onClick={onProfilClick}
+            onClick={handleProfilClick}
             onMouseEnter={() => setHoverProfile(true)}
             onMouseLeave={() => setHoverProfile(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full pl-1 pr-2.5 py-1 transition-colors duration-200 ${
               hoverProfile ? "bg-pink-1" : "bg-pink-5"
             }`}
           >
-            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
+            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-linear-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
               MP
             </div>
             <span className="text-[11px] lg:text-sm font-bold text-text-dark whitespace-nowrap">
@@ -42,7 +75,7 @@ export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
         {/* ── Kolom 3: Keranjang (rata kanan) ── */}
         <div className="flex justify-end">
           <button
-            onClick={onCartClick || (() => navigate("/keranjang"))}
+            onClick={handleCartClick}
             onMouseEnter={() => setHoverCart(true)}
             onMouseLeave={() => setHoverCart(false)}
             className={`flex items-center gap-1.5 border border-pink-2 rounded-full px-2.5 py-1 transition-colors duration-200 ${
@@ -62,7 +95,6 @@ export default function Navbar({ cartCount = 0, onCartClick, onProfilClick }) {
             </span>
           </button>
         </div>
-
       </nav>
     </div>
   );

@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ProfilLayout from "../components/ProfilLayout";
-import iconBack from "../assets/images/icon-back.webp";
+import ProfilLayout from "./ProfilLayout";
 
 const notifikasiData = [
   { id: 1, judul: "Nikmati Diskon 20% Semua Snack!", deskripsi: "Ayo pesan snack favoritmu, diskon terbatas sampai akhir bulan ini.", waktu: "Baru saja", warna: "bg-orange-400", tipe: "Promo", aksi: null },
@@ -12,45 +10,33 @@ const notifikasiData = [
 ];
 
 export default function Notifikasi({ onNavigate }) {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Semua");
   const tabs = ["Semua", "Promo", "Pesan"];
   const filtered = activeTab === "Semua"
     ? notifikasiData
     : notifikasiData.filter((n) => n.tipe === activeTab);
 
-  const handleNavigate = (path) => {
-    if (onNavigate) {
-      onNavigate(path);
-    } else if (path === "beranda") {
-      navigate("/");
-    } else if (path === "profil-saya") {
-      navigate("/profil");
-    } else {
-      navigate(`/${path}`);
-    }
-  };
-
   return (
     <ProfilLayout
       activeMenu="notifikasi"
-      onNavigate={handleNavigate}
+      onNavigate={onNavigate}
       title="Notifikasi"
-      onBack={() => handleNavigate("beranda")}
+      onBack={() => onNavigate("beranda")}
     >
       {/* Top bar DESKTOP */}
       <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
         <div className="flex items-center gap-3">
-          <button onClick={() => handleNavigate("beranda")} className="text-text-dark font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity">
-            <img src={iconBack} alt="Back" className="w-6 h-6" />
-          </button>
+          <button onClick={() => onNavigate("beranda")} className="text-text-dark font-bold text-lg">←</button>
           <h1 className="text-xl font-extrabold text-text-dark">Notifikasi</h1>
         </div>
+        <button className="text-text-dark text-xl">🔍</button>
       </div>
 
-      <p className="px-4 lg:px-8 pt-4 pb-2 text-sm text-text-mid shadow-md shadow-pink-800/20">
+      <p className="px-4 lg:px-8 pt-4 pb-2 text-sm text-text-mid">
         Cek pemberitahuan terbaru pesananmu disini
       </p>
+
+      <div className="border-b border-pink-2/40" />
 
       {/* Tab filter */}
       <div className="flex gap-6 px-4 lg:px-8 py-3 border-b border-pink-2/30">

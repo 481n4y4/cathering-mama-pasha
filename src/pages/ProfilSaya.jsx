@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import EditProfileForm from "../components/EditProfileForm";
 import { getUserById } from "../services/api";
+import logoMamaPasha from "../assets/images/logo-kecil.webp";
 
 export default function ProfilSaya({ onNavigate }) {
   const navigate = useNavigate();
@@ -67,9 +68,12 @@ export default function ProfilSaya({ onNavigate }) {
           setEditForm({
             nama_user: response.data.nama_user || "",
             email: response.data.email || "",
-            no_telepon: response.data.no_telepon ? String(response.data.no_telepon) : "",
+            no_telepon: response.data.no_telepon
+              ? String(response.data.no_telepon)
+              : "",
             alamat: response.data.alamat || "",
-            foto_profile: response.data.foto_profile || response.data.photo || "",
+            foto_profile:
+              response.data.foto_profile || response.data.photo || "",
           });
         } else {
           setError("Gagal mengambil data pengguna");
@@ -86,10 +90,16 @@ export default function ProfilSaya({ onNavigate }) {
 
   const getInitials = (name) => {
     if (!name) return "?";
-    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
-  const profilePhoto = userData?.foto_profile || userData?.photo || logoMamaPasha;
+  const profilePhoto =
+    userData?.foto_profile || userData?.photo || logoMamaPasha;
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -115,12 +125,14 @@ export default function ProfilSaya({ onNavigate }) {
   const usernameValue = userData?.username || userData?.nama_user || "-";
   const infoRows = userData
     ? [
-        { label: "Username",      value: usernameValue },
-        { label: "Nama",          value: userData.nama_user || "-" },
-        { label: "Email",         value: userData.email || "-" },
+        { label: "Username", value: usernameValue },
+        { label: "Nama", value: userData.nama_user || "-" },
+        { label: "Email", value: userData.email || "-" },
         {
           label: "Nomor Telepon",
-          value: userData.no_telepon ? `(+62) ${String(userData.no_telepon).replace(/^0/, "")}` : "-",
+          value: userData.no_telepon
+            ? `(+62) ${String(userData.no_telepon).replace(/^0/, "")}`
+            : "-",
         },
         { label: "Jenis Kelamin", value: userData.jenis_kelamin || "-" },
         { label: "Tanggal lahir", value: userData.tanggal_lahir || "-" },
@@ -134,25 +146,34 @@ export default function ProfilSaya({ onNavigate }) {
       title="Profil Saya"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* ── Top bar DESKTOP ── */}
-      <div className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-pink-2/40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleNavigate("beranda")}
-            className="text-text-dark font-bold text-lg"
-          >
-            ←
-          </button>
-          <h1 className="text-xl font-extrabold text-text-dark">Profil Saya</h1>
+      {/* ══ Top bar DESKTOP ══ */}
+      <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+          <div className="flex justify-start">
+            <button
+              onClick={() => handleNavigate("beranda")}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left text-text-dark"></i>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Kembali
+              </span>
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <span className="text-sm lg:text-base font-extrabold text-text-dark">
+              Profil Saya
+            </span>
+          </div>
+          <div className="flex justify-end" />
         </div>
-        <button className="text-text-dark text-xl">🔍</button>
       </div>
 
       {/* ══════════════════════════════════
           WRAPPER KONTEN
       ══════════════════════════════════ */}
       <div className="px-4 py-6 lg:px-8 lg:py-8">
-
         {/* ── SKELETON ── */}
         {loading && (
           <div
@@ -202,25 +223,35 @@ export default function ProfilSaya({ onNavigate }) {
                   <p className="text-base font-extrabold text-[#B8445E]">
                     {userData?.nama_user || "-"}
                   </p>
-                  <p className="text-xs text-[#E47990] mt-0.5">{userData?.email || "-"}</p>
+                  <p className="text-xs text-[#E47990] mt-0.5">
+                    {userData?.email || "-"}
+                  </p>
                 </div>
               </div>
 
               <div className="h-px mb-5 bg-[#B8445E]/20" />
 
-              <h2 className="text-base font-extrabold text-[#B8445E] mb-1">Profil Saya</h2>
+              <h2 className="text-base font-extrabold text-[#B8445E] mb-1">
+                Profil Saya
+              </h2>
               <p className="text-xs text-[#B8445E]/70 mb-5 leading-relaxed">
-                Kelola informasi profil Anda untuk mengontrol, melindungi dan mengamankan akun
+                Kelola informasi profil Anda untuk mengontrol, melindungi dan
+                mengamankan akun
               </p>
 
               <div className="grid gap-4">
                 {infoRows.map(({ label, value }) => (
-                  <div key={label} className="grid grid-cols-[110px_1px_minmax(0,1fr)] items-center gap-4">
+                  <div
+                    key={label}
+                    className="grid grid-cols-[110px_1px_minmax(0,1fr)] items-center gap-4"
+                  >
                     <span className="text-sm text-[#B8445E]/70 font-semibold text-right">
                       {label}
                     </span>
                     <div className="w-px h-6 bg-[#B8445E]/20" />
-                    <span className="text-sm font-bold text-[#B8445E]">{value}</span>
+                    <span className="text-sm font-bold text-[#B8445E]">
+                      {value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -228,7 +259,9 @@ export default function ProfilSaya({ onNavigate }) {
               <button
                 onClick={() => setShowEdit(true)}
                 className="mt-6 w-full py-3.5 rounded-full font-bold text-white text-sm shadow transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "linear-gradient(90deg, #B8445E, #E47990)" }}
+                style={{
+                  background: "linear-gradient(90deg, #B8445E, #E47990)",
+                }}
               >
                 ✏️ Edit Profil
               </button>
@@ -240,20 +273,28 @@ export default function ProfilSaya({ onNavigate }) {
               <div className="max-w-3xl mx-auto">
                 <div className="rounded-4xl border border-white/50 bg-white/80 p-10 shadow-card backdrop-blur-sm">
                   <div className="mb-8">
-                    <h2 className="text-3xl font-extrabold text-[#B8445E] mb-2">Profil Saya</h2>
+                    <h2 className="text-3xl font-extrabold text-[#B8445E] mb-2">
+                      Profil Saya
+                    </h2>
                     <p className="text-sm text-[#B8445E]/70 leading-relaxed">
-                      Kelola informasi profil Anda untuk mengontrol, melindungi dan mengamankan akun
+                      Kelola informasi profil Anda untuk mengontrol, melindungi
+                      dan mengamankan akun
                     </p>
                   </div>
 
                   <div className="grid gap-5">
                     {infoRows.map(({ label, value }) => (
-                      <div key={label} className="grid grid-cols-[140px_1px_minmax(0,1fr)] items-center gap-6">
+                      <div
+                        key={label}
+                        className="grid grid-cols-[140px_1px_minmax(0,1fr)] items-center gap-6"
+                      >
                         <span className="text-sm font-semibold text-[#B8445E]/70 text-right">
                           {label}
                         </span>
                         <div className="h-6 w-px bg-[#B8445E]/15" />
-                        <span className="text-sm font-bold text-[#B8445E]">{value}</span>
+                        <span className="text-sm font-bold text-[#B8445E]">
+                          {value}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -261,7 +302,9 @@ export default function ProfilSaya({ onNavigate }) {
                   <button
                     onClick={() => setShowEdit(true)}
                     className="mt-10 px-8 py-3 rounded-full font-bold text-white text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
-                    style={{ background: "linear-gradient(90deg, #B8445E, #E47990)" }}
+                    style={{
+                      background: "linear-gradient(90deg, #B8445E, #E47990)",
+                    }}
                   >
                     ✏️ Edit Profil
                   </button>
@@ -278,15 +321,19 @@ export default function ProfilSaya({ onNavigate }) {
       {showEdit && (
         <div
           className="fixed inset-0 z-50 flex items-start lg:items-center justify-center p-4 overflow-y-auto"
-          style={{ background: "rgba(184,68,94,0.35)", backdropFilter: "blur(6px)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowEdit(false); }}
+          style={{
+            background: "rgba(184,68,94,0.35)",
+            backdropFilter: "blur(6px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowEdit(false);
+          }}
         >
           <div
             className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl max-h-[calc(100vh-4rem)] overflow-y-auto"
             style={{ background: "#FCC7D1" }}
           >
             <div className="px-6 py-6">
-
               {/* Header popup */}
               <div className="flex items-center justify-between mb-5">
                 <div>
@@ -318,7 +365,6 @@ export default function ProfilSaya({ onNavigate }) {
           </div>
         </div>
       )}
-
     </ProfilLayout>
   );
 }

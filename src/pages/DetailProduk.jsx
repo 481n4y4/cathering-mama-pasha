@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Jika menggunakan React Router
-import { getProductById } from "../services/api";
+import { useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
+import { addToCart, getProductById } from "../services/api";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 /* ── Data ulasan ─────────────────────────────────────────── */
@@ -49,6 +49,8 @@ export default function DetailProduk({
   const [produk, setProduk] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddSuccess, setShowAddSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
   const { id } = useParams();
@@ -57,6 +59,37 @@ export default function DetailProduk({
   // const { productId } = props;
 
   const toggleLike = (id) => setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    navigate("/");
+  };
+
+  const handleAddToCart = async () => {
+    if (!produk?.id) return;
+    try {
+      await addToCart({ produkId: produk.id, kuantitas: qty });
+      setShowAddSuccess(true);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menambahkan ke keranjang. Coba lagi.");
+    }
+  };
+
+  const handlePesanSekarang = async () => {
+    if (!produk?.id) return;
+    try {
+      await addToCart({ produkId: produk.id, kuantitas: qty });
+      setShowAddSuccess(true);
+      navigate("/keranjang");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menambahkan ke keranjang. Coba lagi.");
+    }
+  };
 
   // Fetch data produk saat component mount atau ID berubah
   useEffect(() => {
@@ -83,8 +116,13 @@ export default function DetailProduk({
             rating: response.data.rating || 4.5, // Default rating jika tidak ada
             deskripsi:
               response.data.deskripsi || "Deskripsi produk belum tersedia",
+            image:
+              response.data.image ||
+              response.data.image_url ||
+              response.data.foto ||
+              response.data.foto_produk ||
+              "",
             emoji: response.data.emoji || "🥟", // Default emoji jika tidak ada
-            stok: response.data.stok,
             kategori: response.data.kategori,
           };
           setProduk(productData);
@@ -102,6 +140,14 @@ export default function DetailProduk({
     fetchProduct();
   }, [id]); // atau [props.productId]
 
+  useEffect(() => {
+    if (!showAddSuccess) return undefined;
+    const timeoutId = setTimeout(() => {
+      setShowAddSuccess(false);
+    }, 1600);
+    return () => clearTimeout(timeoutId);
+  }, [showAddSuccess]);
+
   // Tampilkan loading state
   if (loading) {
     return (
@@ -118,14 +164,27 @@ export default function DetailProduk({
   if (error || !produk) {
     return (
       <div className="min-h-screen bg-pink-5 flex flex-col">
-        <div className="flex items-center px-4 py-3 bg-white">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
-          >
-            <span className="text-lg">←</span>
-            Kembali
-          </button>
+        <div className="sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+          <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+            <div className="flex justify-start">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+                aria-label="Kembali"
+              >
+                <i className="fa-solid fa-arrow-left text-text-dark"></i>
+                <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                  Kembali
+                </span>
+              </button>
+            </div>
+            <div className="flex justify-center">
+              <span className="text-sm lg:text-base font-extrabold text-text-dark">
+                Detail Produk
+              </span>
+            </div>
+            <div className="flex justify-end" />
+          </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center p-6">
@@ -134,7 +193,7 @@ export default function DetailProduk({
               {error || "Produk tidak ditemukan"}
             </p>
             <button
-              onClick={onBack}
+              onClick={handleBack}
               className="bg-pink-6 text-white px-6 py-2 rounded-full"
             >
               Kembali ke Beranda
@@ -148,33 +207,60 @@ export default function DetailProduk({
   return (
     <div className="min-h-screen bg-pink-5 flex flex-col">
       {/* ── Top Bar ────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-pink-6 font-semibold text-sm"
-        >
-          <span className="text-lg">←</span>
-          Detail Produk
-        </button>
-        <button
-          onClick={onKeranjang}
-          className="flex items-center gap-2 bg-pink-6 text-white text-sm font-bold px-4 py-2 rounded-full"
-        >
-          <span>🛒</span>
-          Keranjang
-          {cartCount > 0 && (
-            <span className="bg-white text-pink-6 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
-              {cartCount}
+      <div className="absolute top-0 left-0 right-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+          <div className="flex justify-start">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+              aria-label="Kembali"
+            >
+              <i className="fa-solid fa-arrow-left text-text-dark"></i>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Kembali
+              </span>
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <span className="text-sm lg:text-base font-extrabold text-text-dark">
+              Detail Produk
             </span>
-          )}
-        </button>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={() => navigate("/keranjang")}
+              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+            >
+              <span className="text-sm lg:text-base">🛒</span>
+              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                Keranjang
+              </span>
+              {cartCount > 0 && (
+                <span className="bg-pink-6 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-28">
         {/* Foto produk */}
-        <div className="w-full h-56 lg:h-72 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
-          {produk.emoji}
+        <div className="w-full h-56 lg:h-120 bg-pink-2 flex items-center justify-center text-8xl overflow-hidden">
+          {produk.image ? (
+            <img
+              src={produk.image}
+              alt={produk.nama}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <span>{produk.emoji}</span>
+          )}
         </div>
 
         {/* Info produk */}
@@ -209,13 +295,6 @@ export default function DetailProduk({
             </span>
           </div>
 
-          {/* Stok info (optional) */}
-          {produk.stok !== undefined && (
-            <p className="text-xs text-gray-500 mb-2">
-              Stok: {produk.stok} tersisa
-            </p>
-          )}
-
           {/* Harga */}
           <p className="text-2xl lg:text-3xl font-extrabold text-pink-6 mb-3">
             Rp{produk.harga.toLocaleString("id-ID")}
@@ -231,7 +310,6 @@ export default function DetailProduk({
             <button
               onClick={() => setQty((n) => Math.max(1, n - 1))}
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
-              disabled={produk.stok === 0}
             >
               −
             </button>
@@ -239,18 +317,12 @@ export default function DetailProduk({
               {qty}
             </div>
             <button
-              onClick={() =>
-                setQty((n) => Math.min(n + 1, produk.stok || Infinity))
-              }
+              onClick={() => setQty((n) => n + 1)}
               className="w-9 h-9 rounded-xl bg-pink-6 text-white text-xl font-bold flex items-center justify-center"
-              disabled={produk.stok === 0}
             >
               +
             </button>
           </div>
-          {produk.stok === 0 && (
-            <p className="text-red-500 text-xs text-right mt-1">Stok habis</p>
-          )}
         </div>
 
         {/* ── Ulasan ─────────────────────────────────────────── */}
@@ -298,20 +370,47 @@ export default function DetailProduk({
       {/* ── Bottom Bar (fixed) ──────────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 flex gap-3 px-4 py-3 bg-pink-6">
         <button
-          onClick={() => onKeranjang && onKeranjang(produk, qty)}
+          onClick={handleAddToCart}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
-          disabled={produk.stok === 0}
         >
           + Keranjang
         </button>
         <button
-          onClick={() => onPesan && onPesan(produk, qty)}
+          onClick={handlePesanSekarang}
           className="flex-1 flex items-center justify-center gap-2 bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
-          disabled={produk.stok === 0}
         >
           Pesan Sekarang
         </button>
       </div>
+
+      {showAddSuccess && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: "rgba(184,68,94,0.35)",
+            backdropFilter: "blur(6px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddSuccess(false);
+          }}
+        >
+          <div className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl text-center">
+            <div className="text-4xl mb-2">✅</div>
+            <p className="text-base font-extrabold text-pink-6">
+              Berhasil ditambahkan
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Item sudah masuk ke keranjang.
+            </p>
+            <button
+              onClick={() => setShowAddSuccess(false)}
+              className="mt-4 w-full bg-pink-6 text-white font-bold text-sm py-3 rounded-full"
+            >
+              Oke
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

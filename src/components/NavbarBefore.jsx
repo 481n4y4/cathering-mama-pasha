@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logoMamaPasha from "../assets/images/logo-kecil.webp";
+import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 export default function NavbarBefore({
   cartCount = 0,
@@ -20,10 +20,6 @@ export default function NavbarBefore({
   };
 
   const handleCartClick = () => {
-    if (onCartClick) {
-      onCartClick();
-      return;
-    }
     navigate("/auth");
   };
 

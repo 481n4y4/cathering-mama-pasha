@@ -83,7 +83,7 @@ function ProductCard({ product, isFav, onToggleFav, onDetailProduk }) {
 
 /* ── Dashboard utama ──────────────────────────────────────── */
 export default function Dashboard({ onAddToCart, onDetailProduk }) {
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState("Snack");
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -230,11 +230,11 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   );
 
   const tabs = [
-    { label: "📋 All", key: "All" },
     { label: "🍿 Snack", key: "Snack" },
     { label: "🍱 Catering", key: "Catering" },
     { label: "🔥 Promo", key: "Promo" },
   ];
+
 
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
 
@@ -267,14 +267,12 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             Mau makan enak hari ini?
           </p>
         </div>
-
         {/* ── Error Message ───────────────────────────────────── */}
         {error && (
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
             ⚠️ {error}
           </div>
         )}
-
         {/* ── Search Bar ───────────────────────────────────────── */}
         <div className="relative mb-4">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-text-mid">
@@ -288,7 +286,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             className="w-full pl-11 pr-4 py-3 lg:py-3.5 rounded-full border-2 border-pink-2 bg-white text-sm lg:text-base text-text-dark placeholder:text-text-mid focus:border-pink-3 transition-colors"
           />
         </div>
-
         {/* ── Category Tabs ────────────────────────────────────── */}
         <div className="flex items-center justify-center gap-2.5 mb-5">
           {tabs.map(({ label, key }) => (
@@ -305,7 +302,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             </button>
           ))}
         </div>
-
         {/* ── Banner Diskon ─────────────────────────────────────── */}
         <div className="relative overflow-hidden rounded-2xl bg-pink-6 px-6 lg:px-10 py-5 lg:py-8 flex items-center justify-between mb-7">
           {/* Dekorasi lingkaran */}
@@ -333,7 +329,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             🍱
           </span>
         </div>
-
         {/* ── Section: Rekomendasi ──────────────────────────────── */}
         <div className="flex items-center justify-between mb-3.5">
           <span className="text-[15px] lg:text-lg font-extrabold text-text-dark">
@@ -343,7 +338,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             Lihat Semua
           </button>
         </div>
-
         {/* Grid: 3 kolom HP → 4 kolom desktop */}
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
           {filtered
@@ -360,7 +354,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
               />
             ))}
         </div>
-
         {/* ── Tentang Kami ─────────────────────────────────────── */}
         <div className="bg-white rounded-2xl border-2 border-pink-1 shadow-card flex items-center gap-4 lg:gap-8 p-5 lg:p-8">
           {/* Teks */}
