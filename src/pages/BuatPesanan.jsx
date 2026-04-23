@@ -149,16 +149,23 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto px-3 lg:px-8 pt-5 pb-36 flex flex-col gap-4">
         {/* Kartu alamat */}
-        <div className="bg-white rounded-4xl p-5 shadow-card">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-pink-6 text-base">📍</span>
-            <span className="font-extrabold text-pink-6 text-base">Jeno</span>
-            <span className="text-gray-400 text-sm">(+62) 123-4567-8910</span>
+        <div className="bg-white rounded-4xl p-5 shadow-card relative flex items-center gap-3">
+          <div className="flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-pink-6 text-base">
+                <i className="fa-solid fa-location-dot"></i>
+              </span>
+              <span className="font-extrabold text-pink-6 text-base">Jeno</span>
+              <span className="text-gray-400 text-sm">(+62) 123-4567-8910</span>
+            </div>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Jalan Neo Culture Technology Raya No. 127, Gangnam, Semarang Timur,
+              Kota Semarang, Jawa Tengah, ID 50131
+            </p>
           </div>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Jalan Neo Culture Technology Raya No. 127, Gangnam, Semarang Timur,
-            Kota Semarang, Jawa Tengah, ID 50131
-          </p>
+          <div className="flex-shrink-0 text-gray-400">
+            <i className="fa-solid fa-angle-right"></i>
+          </div>
         </div>
 
         {/* Kartu detail pesanan */}
@@ -207,6 +214,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
               onClick={() => setShowTanggal(true)}
               className="text-gray-500 font-semibold flex items-center gap-2"
             >
+              <i class="fa-solid fa-calendar"></i>
               Delivery
               {tanggalKirim ? ` (${formatTanggal(tanggalKirim)})` : ""}
               <i className="fa-solid fa-chevron-down text-xs"></i>
@@ -217,7 +225,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
             <p className="font-extrabold text-pink-6 mb-2">Metode Pembayaran</p>
             <div className="flex items-center justify-between py-2">
               <span className="text-gray-600 font-semibold">
-                COD (Cash on Delivery)
+                QRIS
               </span>
               <button
                 onClick={() => setMetodePembayaran("cod")}

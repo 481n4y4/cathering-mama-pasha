@@ -83,7 +83,7 @@ export default function NavbarAfter({
             }`}
           >
             <div className="relative">
-              <span className="text-sm lg:text-lg">🛒</span>
+              <i class="fa-solid fa-cart-shopping"></i>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 lg:w-4 lg:h-4 rounded-full bg-pink-6 text-white text-[8px] font-extrabold flex items-center justify-center border border-white">
                   {cartCount}

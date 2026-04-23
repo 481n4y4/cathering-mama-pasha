@@ -26,12 +26,12 @@ export default function Sidebar({
     userData?.photo ||
     logoMamaPasha;
 
-  const menus = [
-    { key: "profil-saya", icon: "👤", label: "Profile" },
-    { key: "pesanan-saya", icon: "📥", label: "Pesanan Saya" },
-    { key: "keranjang", icon: "🛒", label: "Keranjang" },
-    { key: "notifikasi", icon: "🔔", label: "Notifikasi" },
-  ];
+const menus = [
+  { key: "profil-saya", icon: "fa-solid fa-user", label: "Profile" },
+  { key: "pesanan-saya", icon: "fa-solid fa-box", label: "Pesanan Saya" },
+  { key: "keranjang", icon: "fa-solid fa-cart-shopping", label: "Keranjang" },
+  { key: "notifikasi", icon: "fa-solid fa-bell", label: "Notifikasi" },
+];
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -106,9 +106,7 @@ export default function Sidebar({
                   fontSize: 15,
                 }}
               >
-                <span className="text-xl w-7 flex items-center justify-center shrink-0">
-                  {icon}
-                </span>
+                <i className={`${icon} text-xl w-7 flex items-center justify-center shrink-0`}></i>
                 {label}
               </button>
             );
@@ -158,30 +156,28 @@ export default function Sidebar({
 
         {/* Konten halaman */}
         <div className="flex-1">{children}</div>
-
-        {/* ── Bottom Tab Bar MOBILE ── */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-pink-200 flex z-50">
-          {menus.map(({ key, icon, label }) => (
+          {/* ── Bottom Tab Bar MOBILE ── */}
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-pink-200 flex z-50">
+            {menus.map(({ key, icon, label }) => (
+              <button
+                key={key}
+                onClick={() => onNavigate(key)}
+                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors"
+                style={{ color: activeMenu === key ? "#B8445E" : "#aaa" }}
+              >
+                <i className={`${icon} text-lg`}></i>
+                <span className="text-[9px] font-bold">{label}</span>
+              </button>
+            ))}
             <button
-              key={key}
-              onClick={() => onNavigate(key)}
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors"
-              style={{ color: activeMenu === key ? "#B8445E" : "#aaa" }}
+              onClick={handleLogout}
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5"
+              style={{ color: "#E53935" }}
             >
-              <span className="text-lg">{icon}</span>
-              <span className="text-[9px] font-bold">{label}</span>
+              <i className="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+              <span className="text-[9px] font-bold">Logout</span>
             </button>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5"
-            style={{ color: "#E53935" }}
-          >
-            <span className="text-lg">🚪</span>
-            <span className="text-[9px] font-bold">Logout</span>
-          </button>
-        </div>
-
+          </div>
         {/* Padding bawah mobile */}
         <div className="lg:hidden h-20" />
       </div>
