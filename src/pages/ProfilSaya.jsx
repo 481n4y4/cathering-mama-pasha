@@ -109,6 +109,7 @@ export default function ProfilSaya({ onNavigate }) {
       const updated = { ...userData, ...editForm };
       setUserData(updated);
       localStorage.setItem("user", JSON.stringify(updated));
+      window.dispatchEvent(new Event("auth-changed"));
       setEditMsg({ type: "success", text: "Profil berhasil diperbarui! ✅" });
       setTimeout(() => {
         setShowEdit(false);

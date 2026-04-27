@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoMamaPasha from "../assets/images/logo-kecil.webp";
 
 export default function Sidebar({
@@ -9,16 +9,33 @@ export default function Sidebar({
   onBack,
 }) {
   // Ambil data user dari localStorage untuk foto & nama
-  const rawUser = localStorage.getItem("user");
-  const userData = rawUser
-    ? (() => {
-        try {
-          return JSON.parse(rawUser);
-        } catch {
-          return null;
-        }
-      })()
-    : null;
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const syncUser = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setUserData(null);
+        return;
+      }
+      try {
+        setUserData(JSON.parse(rawUser));
+      } catch {
+        setUserData(null);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
   const namaUser = userData?.nama_user || userData?.nama || "User";
   const profilePhoto =
     userData?.foto_profile ||
@@ -35,7 +52,6 @@ const menus = [
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     localStorage.removeItem("userId");
     window.dispatchEvent(new Event("auth-changed"));
     onNavigate("beranda");

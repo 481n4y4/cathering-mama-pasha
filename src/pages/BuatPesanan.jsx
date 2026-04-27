@@ -22,6 +22,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState("");
   const [cartSubtotal, setCartSubtotal] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
 
   const fallbackItem = produk ?? {
     nama: "Risoles Mayonaise",
@@ -53,6 +54,39 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     now.setDate(now.getDate() + 3);
     return now.toISOString().slice(0, 10);
   }, []);
+
+  useEffect(() => {
+    const syncUser = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setProfileUser(null);
+        return;
+      }
+      try {
+        setProfileUser(JSON.parse(rawUser));
+      } catch {
+        setProfileUser(null);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
+
+  const displayName =
+    profileUser?.nama_user || profileUser?.nama || profileUser?.username || "-";
+  const displayPhone = profileUser?.no_telepon
+    ? `(+62) ${String(profileUser.no_telepon).replace(/^0/, "")}`
+    : "-";
+  const displayAddress = profileUser?.alamat || "-";
 
   const formatTanggal = (value) => {
     if (!value) return "";
@@ -219,12 +253,13 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
               <span className="text-pink-6 text-base">
                 <i className="fa-solid fa-location-dot"></i>
               </span>
-              <span className="font-extrabold text-pink-6 text-base">Jeno</span>
-              <span className="text-gray-400 text-sm">(+62) 123-4567-8910</span>
+              <span className="font-extrabold text-pink-6 text-base">
+                {displayName}
+              </span>
+              <span className="text-gray-400 text-sm">{displayPhone}</span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Jalan Neo Culture Technology Raya No. 127, Gangnam, Semarang
-              Timur, Kota Semarang, Jawa Tengah, ID 50131
+              {displayAddress}
             </p>
           </div>
           <div className="flex-shrink-0 text-gray-400">

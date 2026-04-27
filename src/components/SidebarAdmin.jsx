@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3,
@@ -13,6 +13,7 @@ import logoMamaPasha from "../assets/images/logo-kecil.png";
 const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [userData, setUserData] = useState(null);
 
   const menus = [
     {
@@ -55,11 +56,41 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     localStorage.removeItem("userId");
     window.dispatchEvent(new Event("auth-changed"));
     navigate("/auth");
   };
+
+  useEffect(() => {
+    const syncUser = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setUserData(null);
+        return;
+      }
+      try {
+        setUserData(JSON.parse(rawUser));
+      } catch {
+        setUserData(null);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
+
+  const profilePhoto =
+    userData?.foto_profile || userData?.photo || logoMamaPasha;
+  const profileName =
+    userData?.nama_user || userData?.nama || userData?.username || "Admin";
 
   const navItemClass = ({ isActive }) =>
     "flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 w-full text-left " +
@@ -103,8 +134,8 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
             }}
           >
             <img
-              src={logoMamaPasha}
-              alt="Logo Mama Pasha's Treats"
+              src={profilePhoto}
+              alt="Foto Profil"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
@@ -112,7 +143,7 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
             className="font-extrabold mb-2 text-center"
             style={{ color: "#1a1a1a", fontSize: 19 }}
           >
-            Admin
+            {profileName}
           </p>
           <span className="text-[11px] font-bold text-[#B8445E] bg-white/60 px-3 py-1 rounded-full">
             Administrator

@@ -60,7 +60,25 @@ const LoginForm = () => {
           localStorage.setItem("token", token);
         }
         if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
+          const storedUser = localStorage.getItem("user");
+          let mergedUser = user;
+          if (storedUser) {
+            try {
+              const parsed = JSON.parse(storedUser);
+              mergedUser = {
+                ...user,
+                foto_profile: parsed?.foto_profile ?? user?.foto_profile,
+                photo: parsed?.photo ?? user?.photo,
+                nama_user: parsed?.nama_user ?? user?.nama_user,
+                nama: parsed?.nama ?? user?.nama,
+                no_telepon: parsed?.no_telepon ?? user?.no_telepon,
+                alamat: parsed?.alamat ?? user?.alamat,
+              };
+            } catch {
+              mergedUser = user;
+            }
+          }
+          localStorage.setItem("user", JSON.stringify(mergedUser));
         }
         if (userId) {
           localStorage.setItem("userId", userId);

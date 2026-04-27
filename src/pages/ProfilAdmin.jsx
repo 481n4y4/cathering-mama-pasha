@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
 import EditProfileForm from "../components/EditProfileForm";
@@ -14,24 +14,51 @@ export default function ProfilAdmin() {
   const [showEdit, setShowEdit] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [editMsg, setEditMsg] = useState({ type: "", text: "" });
+  const [userData, setUserData] = useState(null);
+  const [editForm, setEditForm] = useState({
+    nama_user: "",
+    email: "",
+    no_telepon: "",
+    alamat: "",
+    foto_profile: "",
+  });
 
-  const userData = useMemo(() => {
-    const rawUser = localStorage.getItem("user");
-    if (!rawUser) return null;
-    try {
-      return JSON.parse(rawUser);
-    } catch {
-      return null;
-    }
+  useEffect(() => {
+    const syncUser = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setUserData(null);
+        return;
+      }
+      try {
+        setUserData(JSON.parse(rawUser));
+      } catch {
+        setUserData(null);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
   }, []);
 
-  const [editForm, setEditForm] = useState({
-    nama_user: userData?.nama_user || userData?.nama || "",
-    email: userData?.email || "",
-    no_telepon: userData?.no_telepon ? String(userData.no_telepon) : "",
-    alamat: userData?.alamat || "",
-    foto_profile: userData?.foto_profile || userData?.photo || "",
-  });
+  useEffect(() => {
+    if (!userData) return;
+    setEditForm({
+      nama_user: userData?.nama_user || userData?.nama || "",
+      email: userData?.email || "",
+      no_telepon: userData?.no_telepon ? String(userData.no_telepon) : "",
+      alamat: userData?.alamat || "",
+      foto_profile: userData?.foto_profile || userData?.photo || "",
+    });
+  }, [userData]);
 
   const nama = userData?.nama_user || userData?.nama || "Admin";
   const email = userData?.email || "-";
@@ -49,7 +76,9 @@ export default function ProfilAdmin() {
     setEditMsg({ type: "", text: "" });
     try {
       const updated = { ...userData, ...editForm };
+      setUserData(updated);
       localStorage.setItem("user", JSON.stringify(updated));
+      window.dispatchEvent(new Event("auth-changed"));
       setEditMsg({ type: "success", text: "Profil berhasil diperbarui! ✅" });
       setTimeout(() => {
         setShowEdit(false);

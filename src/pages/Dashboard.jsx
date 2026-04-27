@@ -101,6 +101,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => !!localStorage.getItem("token"),
   );
+  const [profileUser, setProfileUser] = useState(null);
   const navigate = useNavigate();
 
   const handleDetailProduk = (productId) => {
@@ -231,6 +232,32 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     };
   }, []);
 
+  useEffect(() => {
+    const syncUser = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setProfileUser(null);
+        return;
+      }
+      try {
+        setProfileUser(JSON.parse(rawUser));
+      } catch {
+        setProfileUser(null);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
+
   const toggleFav = (id) => {
     setFavs((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -243,6 +270,10 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🍿 Snack", key: "Snack", disabled: false },
     { label: "🍱 Catering", key: "Catering", disabled: false },
   ];
+
+  const displayName =
+    profileUser?.nama_user || profileUser?.nama || profileUser?.username || "";
+  const greetingName = isLoggedIn && displayName ? displayName : "Teman";
 
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
 
@@ -269,7 +300,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
         {/* ── Greeting ─────────────────────────────────────────── */}
         <div className="text-center mb-5 animate-fade-up">
           <h1 className="font-script text-pink-6 font-bold leading-tight text-[34px] lg:text-5xl">
-            Halo, Jeno!
+            Halo, {greetingName}!
           </h1>
           <p className="text-sm lg:text-base font-semibold text-text-mid mt-1">
             Mau makan enak hari ini?
