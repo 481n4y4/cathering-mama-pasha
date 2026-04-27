@@ -35,8 +35,8 @@ const EditMenu = () => {
             kategori: product.kategori || "Makanan",
             image: null,
           });
-          if (product.image && product.image !== "-") {
-            setPreviewImage(product.image);
+          if (product.gambar && product.gambar !== "-") {
+            setPreviewImage(product.gambar);
           }
         } else {
           setError("Gagal memuat data produk.");
@@ -85,7 +85,6 @@ const EditMenu = () => {
           nama_produk: formData.nama_produk,
           harga: Number(formData.harga),
           kategori: formData.kategori,
-          image: previewImage || "-",
         };
       }
 

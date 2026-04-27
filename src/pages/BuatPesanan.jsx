@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkCheckoutDate, getCart } from "../services/api";
+import {
+  checkCheckoutDate,
+  createOrder,
+  getCart,
+  paymentMidtrans,
+} from "../services/api";
 
 /* ── Halaman Buat Pesanan ────────────────────────────────── */
 export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
@@ -8,9 +13,11 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
   const [catatan, setCatatan] = useState("");
   const [showTanggal, setShowTanggal] = useState(false);
   const [tanggalKirim, setTanggalKirim] = useState("");
-  const [metodePembayaran, setMetodePembayaran] = useState("cod");
+  const [metodePembayaran, setMetodePembayaran] = useState("Qris");
   const [tanggalError, setTanggalError] = useState("");
   const [tanggalLoading, setTanggalLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState("");
@@ -120,6 +127,63 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     navigate("/keranjang");
   };
 
+  const handleCheckout = async () => {
+    setSubmitError("");
+
+    if (!tanggalKirim) {
+      setTanggalError("Pilih tanggal pengiriman terlebih dahulu.");
+      setShowTanggal(true);
+      return;
+    }
+
+    setSubmitLoading(true);
+    try {
+      const orderResponse = await createOrder({
+        tanggal_pengiriman: tanggalKirim,
+        metode_pembayaran: metodePembayaran,
+        pesan: catatan,
+      });
+
+      const orderId = orderResponse?.data?._id;
+      if (!orderId) {
+        throw new Error("Order gagal dibuat.");
+      }
+
+      if (metodePembayaran === "Qris") {
+        const paymentResponse = await paymentMidtrans({ orderId });
+        const redirectUrl = paymentResponse?.data?.payment?.redirect_url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+        throw new Error("Link pembayaran QRIS tidak tersedia.");
+      }
+
+      if (metodePembayaran === "Transfer") {
+        navigate("/bukti-transfer", {
+          state: {
+            orderId,
+            noRekeningPenjual: orderResponse?.data?.no_rekening_penjual,
+            paymentInstruction: orderResponse?.data?.payment_instruction,
+          },
+        });
+        return;
+      }
+
+      if (onPesan) {
+        onPesan(produk, qty, orderResponse);
+      }
+    } catch (err) {
+      const message =
+        typeof err === "string"
+          ? err
+          : err?.message || "Gagal membuat pesanan.";
+      setSubmitError(message);
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-pink-3 flex flex-col">
       {/* ══ Top Bar ══ */}
@@ -159,8 +223,8 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
               <span className="text-gray-400 text-sm">(+62) 123-4567-8910</span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Jalan Neo Culture Technology Raya No. 127, Gangnam, Semarang Timur,
-              Kota Semarang, Jawa Tengah, ID 50131
+              Jalan Neo Culture Technology Raya No. 127, Gangnam, Semarang
+              Timur, Kota Semarang, Jawa Tengah, ID 50131
             </p>
           </div>
           <div className="flex-shrink-0 text-gray-400">
@@ -212,10 +276,10 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
             <span className="font-bold text-pink-6">Opsi Pengiriman</span>
             <button
               onClick={() => setShowTanggal(true)}
-              className="text-gray-500 font-semibold flex items-center gap-2"
+              className="flex items-center gap-2 rounded-full px-3 py-1.5 bg-pink-6 text-white font-bold shadow-sm shadow-pink-2/40 hover:bg-pink-5 transition-colors"
             >
-              <i class="fa-solid fa-calendar"></i>
-              Delivery
+              <i className="fa-solid fa-calendar"></i>
+              Pilih Delivery
               {tanggalKirim ? ` (${formatTanggal(tanggalKirim)})` : ""}
               <i className="fa-solid fa-chevron-down text-xs"></i>
             </button>
@@ -224,35 +288,31 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
           <div className="bg-gray-200/90 rounded-2xl p-4">
             <p className="font-extrabold text-pink-6 mb-2">Metode Pembayaran</p>
             <div className="flex items-center justify-between py-2">
-              <span className="text-gray-600 font-semibold">
-                QRIS
-              </span>
+              <span className="text-gray-600 font-semibold">QRIS</span>
               <button
-                onClick={() => setMetodePembayaran("cod")}
+                onClick={() => setMetodePembayaran("Qris")}
                 className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  metodePembayaran === "cod"
+                  metodePembayaran === "Qris"
                     ? "bg-pink-6 border-pink-6"
                     : "bg-white border-gray-300"
                 }`}
               >
-                {metodePembayaran === "cod" && (
+                {metodePembayaran === "Qris" && (
                   <i className="fa-solid fa-check text-white text-[10px]"></i>
                 )}
               </button>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-gray-600 font-semibold">
-                Transfer BRI / BCA
-              </span>
+              <span className="text-gray-600 font-semibold">Transfer</span>
               <button
-                onClick={() => setMetodePembayaran("transfer")}
+                onClick={() => setMetodePembayaran("Transfer")}
                 className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  metodePembayaran === "transfer"
+                  metodePembayaran === "Transfer"
                     ? "bg-pink-6 border-pink-6"
                     : "bg-white border-gray-300"
                 }`}
               >
-                {metodePembayaran === "transfer" && (
+                {metodePembayaran === "Transfer" && (
                   <i className="fa-solid fa-check text-white text-[10px]"></i>
                 )}
               </button>
@@ -288,11 +348,17 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
 
       {/* ── Bottom Bar (fixed) ──────────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 px-3 lg:px-8 py-3 bg-pink-6">
+        {submitError && (
+          <p className="mb-2 text-xs text-white/90 font-semibold text-center">
+            {submitError}
+          </p>
+        )}
         <button
-          onClick={() => onPesan && onPesan(produk, qty)}
-          className="w-full bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full"
+          onClick={handleCheckout}
+          className="w-full bg-white text-pink-6 font-bold text-sm py-3.5 rounded-full disabled:opacity-70"
+          disabled={submitLoading}
         >
-          Checkout
+          {submitLoading ? "Memproses..." : "Checkout"}
         </button>
       </div>
 
