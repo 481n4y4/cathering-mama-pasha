@@ -33,28 +33,6 @@ const TambahMenu = () => {
     }
   };
 
-  const uploadToCloudinary = async (file) => {
-    const form = new FormData();
-    form.append("file", file);
-    form.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      {
-        method: "POST",
-        body: form,
-      },
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
-      throw new Error(errorBody?.error?.message || "Upload gambar gagal.");
-    }
-
-    const data = await response.json();
-    return data.secure_url;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -62,15 +40,11 @@ const TambahMenu = () => {
     setSuccess(false);
 
     try {
-      const imageUrl = formData.image
-        ? await uploadToCloudinary(formData.image)
-        : "-";
-      const submitData = {
-        nama_produk: formData.nama_produk,
-        harga: Number(formData.harga),
-        kategori: formData.kategori,
-        image: imageUrl,
-      };
+      const submitData = new FormData();
+      submitData.append("nama_produk", formData.nama_produk);
+      submitData.append("harga", Number(formData.harga));
+      submitData.append("kategori", formData.kategori);
+      submitData.append("image", formData.image);
 
       await createProduct(submitData);
       setSuccess(true);

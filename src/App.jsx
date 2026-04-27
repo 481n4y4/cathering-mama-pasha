@@ -18,6 +18,7 @@ import PesananSaya from "./pages/PesananSaya.jsx";
 import Keranjang from "./pages/Keranjang.jsx";
 import Notifikasi from "./pages/Notifikasi.jsx";
 import BuatPesanan from "./pages/BuatPesanan.jsx";
+import BuktiTransfer from "./pages/BuktiTransfer.jsx";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/keranjang" element={<Keranjang />} />
           <Route path="/notifikasi" element={<Notifikasi />} />
           <Route path="/buat-pesanan" element={<BuatPesanan />} />
+          <Route path="/bukti-transfer" element={<BuktiTransfer />} />
         </Route>
       </Routes>
     </BrowserRouter>

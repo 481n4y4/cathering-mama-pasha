@@ -117,6 +117,7 @@ export default function DetailProduk({
             deskripsi:
               response.data.deskripsi || "Deskripsi produk belum tersedia",
             image:
+              response.data.gambar ||
               response.data.image ||
               response.data.image_url ||
               response.data.foto ||

@@ -169,6 +169,71 @@ export const checkCheckoutDate = async ({ tanggal_pengiriman }) => {
   }
 };
 
+export const createOrder = async ({
+  tanggal_pengiriman,
+  metode_pembayaran,
+  pesan,
+}) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      "/api/orders/create",
+      { tanggal_pengiriman, metode_pembayaran, pesan },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const paymentMidtrans = async ({ orderId }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      `/api/orders/payment/${orderId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error initiating Midtrans payment:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const uploadBuktiTransfer = async ({ orderId, file }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("bukti_transfer", file);
+
+    const response = await api.post(
+      `/api/orders/upload-bukti/${orderId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading transfer proof:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");
