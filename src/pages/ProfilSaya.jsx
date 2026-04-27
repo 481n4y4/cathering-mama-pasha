@@ -134,8 +134,7 @@ export default function ProfilSaya({ onNavigate }) {
             ? `(+62) ${String(userData.no_telepon).replace(/^0/, "")}`
             : "-",
         },
-        { label: "Jenis Kelamin", value: userData.jenis_kelamin || "-" },
-        { label: "Tanggal lahir", value: userData.tanggal_lahir || "-" },
+        { label: "Alamat", value: userData.alamat || "-" },
       ]
     : [];
 
