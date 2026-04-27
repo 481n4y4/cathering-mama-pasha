@@ -1,25 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
-import { addToCart, getProductById } from "../services/api";
+import {
+  addToCart,
+  getProductById,
+  getCommentsByProduct,
+  createComment,
+  deleteComment,
+} from "../services/api";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
-
-/* ── Data ulasan ─────────────────────────────────────────── */
-const ulasan = [
-  {
-    id: 1,
-    user: "b****e",
-    rating: 5,
-    liked: false,
-    teks: "Risolesnya enak, mantap, pengirimannya juga tepat waktu, worth it pesan disini!",
-  },
-  {
-    id: 2,
-    user: "j****8",
-    rating: 5,
-    liked: true,
-    teks: "ga ragu pesan catering disini, murah enak, cocok untuk berbagai acara,,, sukses selalu Mama Pasha's Treats...",
-  },
-];
 
 /* ── Bintang ─────────────────────────────────────────────── */
 function Stars({ rating, size = "text-lg" }) {
@@ -45,11 +33,17 @@ export default function DetailProduk({
   cartCount = 0,
 }) {
   const [qty, setQty] = useState(1);
-  const [likes, setLikes] = useState({ 1: false, 2: true });
   const [produk, setProduk] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddSuccess, setShowAddSuccess] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newCommentRating, setNewCommentRating] = useState(5);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [isLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
@@ -57,16 +51,6 @@ export default function DetailProduk({
 
   // Atau bisa juga terima sebagai prop
   // const { productId } = props;
-
-  const toggleLike = (id) => setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-      return;
-    }
-    navigate("/");
-  };
 
   const handleAddToCart = async () => {
     if (!produk?.id) return;
@@ -91,7 +75,82 @@ export default function DetailProduk({
     }
   };
 
-  // Fetch data produk saat component mount atau ID berubah
+  const handlePostComment = async () => {
+    if (!newCommentText.trim()) {
+      alert("Komentar tidak boleh kosong");
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      await createComment({
+        produk_id: produk.id,
+        teks_komentar: newCommentText,
+        rating: newCommentRating,
+      });
+      setNewCommentText("");
+      setNewCommentRating(5);
+      // Reload comments
+      await fetchComments();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengirim komentar. Pastikan Anda sudah login.");
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus komentar ini?")) return;
+
+    try {
+      await deleteComment(commentId);
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Gagal menghapus komentar. Anda hanya bisa menghapus komentar sendiri.",
+      );
+    }
+  };
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    navigate("/");
+  };
+
+  const fetchComments = async (productId) => {
+    if (!productId) return;
+    try {
+      setLoadingComments(true);
+      const response = await getCommentsByProduct(productId);
+      if (response.success && response.data) {
+        setComments(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  // Extract user ID dari JWT token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        // JWT format: header.payload.signature
+        const payload = token.split(".")[1];
+        const decoded = JSON.parse(atob(payload));
+        setCurrentUserId(decoded.id || decoded.userId);
+      } catch (err) {
+        console.error("Error decoding token:", err);
+      }
+    }
+  }, []);
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -138,8 +197,17 @@ export default function DetailProduk({
       }
     };
 
-    fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]); // atau [props.productId]
+
+  // Fetch comments ketika produk berhasil diload
+  useEffect(() => {
+    if (produk?.id) {
+      fetchComments(produk.id);
+    }
+  }, [produk?.id]);
 
   useEffect(() => {
     if (!showAddSuccess) return undefined;
@@ -331,40 +399,123 @@ export default function DetailProduk({
           {/* Header ulasan */}
           <div className="px-4 py-3 border-b-2 border-pink-6/30">
             <h2 className="text-base font-extrabold text-pink-6">
-              Ulasan ({ulasan.length * 25})
+              Ulasan ({comments.length || 0})
             </h2>
           </div>
 
-          {/* List ulasan */}
-          {ulasan.map((u, i) => (
-            <div
-              key={u.id}
-              className={`px-4 py-4 ${i < ulasan.length - 1 ? "border-b border-pink-2/50" : ""}`}
-            >
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  {/* Avatar */}
-                  <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                    <span className="text-gray-400 text-lg">👤</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-600">{u.user}</p>
-                    <Stars rating={u.rating} size="text-sm" />
-                  </div>
+          {/* Form tambah komentar */}
+          {isLoggedIn ? (
+            <div className="px-4 py-4 border-b border-pink-2/50 bg-white">
+              <p className="text-xs font-bold text-gray-600 mb-2">
+                Berikan komentar Anda
+              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-xs text-gray-600">Rating:</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setNewCommentRating(star)}
+                      className={`text-lg ${
+                        star <= newCommentRating
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
                 </div>
-                {/* Tombol like */}
+              </div>
+              <textarea
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                placeholder="Tulis komentar Anda di sini..."
+                className="w-full text-xs p-2 border border-pink-2 rounded-lg resize-none focus:outline-none focus:border-pink-6"
+                rows="3"
+              />
+              <div className="flex gap-2 mt-2 justify-end">
                 <button
-                  onClick={() => toggleLike(u.id)}
-                  className="text-lg mt-1"
+                  onClick={() => {
+                    setNewCommentText("");
+                    setNewCommentRating(5);
+                  }}
+                  className="text-xs font-bold px-3 py-1 rounded-full border border-pink-2 text-text-dark hover:bg-pink-1"
                 >
-                  {likes[u.id] ? "👍" : "👍🏻"}
+                  Batal
+                </button>
+                <button
+                  onClick={handlePostComment}
+                  disabled={submittingComment}
+                  className="text-xs font-bold px-3 py-1 rounded-full bg-pink-6 text-white hover:opacity-90 disabled:opacity-60"
+                >
+                  {submittingComment ? "Mengirim..." : "Kirim"}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 leading-relaxed mt-1">
-                {u.teks}
-              </p>
             </div>
-          ))}
+          ) : (
+            <div className="px-4 py-3 text-xs text-gray-600 bg-white border-b border-pink-2/50">
+              <a
+                href="#"
+                onClick={() => navigate("/login")}
+                className="text-pink-6 font-bold"
+              >
+                Login
+              </a>{" "}
+              untuk memberikan komentar.
+            </div>
+          )}
+
+          {/* Loading komentar */}
+          {loadingComments && (
+            <div className="px-4 py-4 text-center text-xs text-gray-600">
+              Memuat komentar...
+            </div>
+          )}
+
+          {/* List komentar */}
+          {!loadingComments && comments.length === 0 && (
+            <div className="px-4 py-4 text-center text-xs text-gray-600">
+              Belum ada komentar. Jadilah yang pertama!
+            </div>
+          )}
+
+          {!loadingComments &&
+            comments.map((comment, i) => (
+              <div
+                key={comment._id}
+                className={`px-4 py-4 ${
+                  i < comments.length - 1 ? "border-b border-pink-2/50" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    {/* Avatar */}
+                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                      <span className="text-gray-400 text-lg">👤</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-600">
+                        {comment.user_id?.nama_user || "User"}
+                      </p>
+                      <Stars rating={comment.rating || 0} size="text-sm" />
+                    </div>
+                  </div>
+                  {/* Tombol hapus jika pemilik */}
+                  {currentUserId === comment.user_id._id && (
+                    <button
+                      onClick={() => handleDeleteComment(comment._id)}
+                      className="text-xs text-red-500 hover:text-red-700 font-bold"
+                    >
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed mt-1">
+                  {comment.teks_komentar}
+                </p>
+              </div>
+            ))}
         </div>
       </div>
 

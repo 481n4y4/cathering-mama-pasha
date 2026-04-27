@@ -400,4 +400,67 @@ export const deleteProduct = async (id) => {
   }
 };
 
+export const getCommentsByProduct = async (productId) => {
+  try {
+    const response = await api.get(`/api/comments/product/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching comments for product ${productId}:`, error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const createComment = async ({ produk_id, teks_komentar, rating }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      "/api/comments",
+      { produk_id, teks_komentar, rating },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const deleteComment = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/api/comments/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const updateComment = async (id, { teks_komentar, rating }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.put(
+      `/api/comments/${id}`,
+      { teks_komentar, rating },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export default api;
