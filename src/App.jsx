@@ -10,6 +10,7 @@ import ProfilAdmin from "./pages/ProfilAdmin.jsx";
 import KelolaMenu from "./pages/KelolaMenu.jsx";
 import KelolaUser from "./pages/KelolaUser.jsx";
 import KelolaPesanan from "./pages/KelolaPesanan.jsx";
+import DetailPesanan from "./pages/DetailPesanan.jsx";
 import NotifAdmin from "./pages/NotifAdmin.jsx";
 import TambahMenu from "./pages/TambahMenu.jsx";
 import EditMenu from "./pages/EditMenu.jsx";
@@ -36,6 +37,10 @@ export default function App() {
           <Route path="/admin/kelola-menu" element={<KelolaMenu />} />
           <Route path="/admin/kelola-user" element={<KelolaUser />} />
           <Route path="/admin/kelola-pesanan" element={<KelolaPesanan />} />
+          <Route
+            path="/admin/kelola-pesanan/:id"
+            element={<DetailPesanan />}
+          />
           <Route path="/admin/notifikasi" element={<NotifAdmin />} />
           <Route path="/admin/kelola-menu/tambah" element={<TambahMenu />} />
           <Route path="/admin/kelola-menu/edit/:id" element={<EditMenu />} />

@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
@@ -37,23 +38,31 @@ const pesananData = [
 ];
 
 const KelolaPesanan = () => {
+  const navigate = useNavigate();
+
+  const handleDetail = (order) => {
+    navigate(`/admin/kelola-pesanan/${order.id}`, { state: { order } });
+  };
+
   return (
     <SidebarAdmin title="Kelola Pesanan">
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Navbar */}
         <NavbarProfile page="/" />
 
         {/* Header Title */}
-        <div className="px-10 py-6 shrink-0">
-          <h1 className="text-3xl font-semibold text-black">Kelola Pesanan</h1>
+        <div className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 shrink-0">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-black">
+            Kelola Pesanan
+          </h1>
         </div>
 
         {/* Table Area */}
-        <div className="px-10 pb-10 flex-1 overflow-hidden flex flex-col">
+        <div className="px-4 sm:px-6 lg:px-10 pb-6 lg:pb-10 flex-1 overflow-hidden flex flex-col">
           <div className="bg-white rounded-3xl shadow-md flex flex-col flex-1 overflow-hidden">
             {/* Toolbar */}
-            <div className="p-8 pb-6 flex gap-4 items-center shrink-0">
-              <div className="relative flex-1 max-w-2xl">
+            <div className="p-5 sm:p-6 lg:p-8 pb-4 sm:pb-6 flex flex-col lg:flex-row gap-4 lg:items-center shrink-0">
+              <div className="relative flex-1 max-w-2xl w-full">
                 <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
@@ -61,8 +70,8 @@ const KelolaPesanan = () => {
                   className="bg-[#f2e4e6] text-gray-800 pl-11 pr-4 py-3.5 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-pink-300 placeholder-gray-500 font-medium"
                 />
               </div>
-              <div className="relative ml-auto">
-                <select className="bg-[#f2e4e6] text-black font-semibold py-3.5 pl-6 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-pink-300 appearance-none cursor-pointer">
+              <div className="relative w-full lg:w-auto lg:ml-auto">
+                <select className="bg-[#f2e4e6] w-full lg:w-auto text-black font-semibold py-3.5 pl-6 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-pink-300 appearance-none cursor-pointer">
                   <option>Semua Status</option>
                   <option>Sedang diproses</option>
                   <option>Sedang diantar</option>
@@ -72,8 +81,49 @@ const KelolaPesanan = () => {
               </div>
             </div>
 
+            {/* Mobile Cards */}
+            <div className="lg:hidden px-5 sm:px-6 pb-6 space-y-4">
+              {pesananData.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-pink-1 bg-[#fff7f8] p-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-extrabold text-black">
+                        {item.nama}
+                      </p>
+                      <p className="text-xs text-gray-500 whitespace-pre-line">
+                        {item.tanggal}
+                      </p>
+                    </div>
+                    <span
+                      className={`${item.statusColor} py-1.5 px-3 rounded-xl text-xs font-bold inline-block text-center`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 text-sm font-bold text-black whitespace-pre-line">
+                    {item.pesanan}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                    <span>
+                      {item.metode === "BRI" ? "BRI" : item.metode}
+                    </span>
+                    <span className="font-bold text-black">{item.total}</span>
+                  </div>
+                  <button
+                    onClick={() => handleDetail(item)}
+                    className="mt-4 w-full bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2.5 rounded-xl transition-colors text-sm"
+                  >
+                    Detail pesanan
+                  </button>
+                </div>
+              ))}
+            </div>
+
             {/* Table */}
-            <div className="flex-1 overflow-auto px-8 py-2">
+            <div className="hidden lg:block flex-1 overflow-auto px-8 py-2">
               <table className="w-full text-left border-collapse min-w-max">
                 <thead className="bg-[#f3e3d2] sticky top-0 z-10 shadow-sm">
                   <tr>
@@ -143,8 +193,11 @@ const KelolaPesanan = () => {
                         </span>
                       </td>
                       <td className="py-6 px-6 text-center align-middle">
-                        <button className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-1 mx-auto min-w-[120px]">
-                          Ubah Status <ChevronDown className="w-4 h-4 ml-1" />
+                        <button
+                          onClick={() => handleDetail(item)}
+                          className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
+                        >
+                          Detail pesanan
                         </button>
                       </td>
                     </tr>
@@ -154,11 +207,11 @@ const KelolaPesanan = () => {
             </div>
 
             {/* Pagination */}
-            <div className="p-6 px-8 border-t border-gray-200 flex justify-between items-center shrink-0">
-              <span className="text-gray-400 font-semibold text-sm">
+            <div className="p-5 sm:p-6 px-5 sm:px-8 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shrink-0">
+              <span className="text-gray-400 font-semibold text-sm text-center sm:text-left">
                 Menampilkan 1 - 3 dari 120 pesanan
               </span>
-              <div className="flex items-center gap-2 text-gray-600 font-bold">
+              <div className="flex items-center justify-center sm:justify-end gap-2 text-gray-600 font-bold">
                 <button className="w-8 h-8 flex items-center justify-center bg-[#de6a84] text-white rounded-lg shadow-sm">
                   1
                 </button>
