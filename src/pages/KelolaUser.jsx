@@ -37,13 +37,8 @@ const KelolaUser = () => {
         {/* Navbar */}
         <NavbarProfile page="/" />
 
-        {/* Header Title */}
-        <div className="px-10 py-6 shrink-0">
-          <h1 className="text-3xl font-semibold text-black">Kelola User</h1>
-        </div>
-
         {/* Table Area */}
-        <div className="px-10 pb-10 flex-1 overflow-hidden flex flex-col">
+        <div className="px-10 pt-3 pb-10 flex-1 overflow-hidden flex flex-col">
           <div className="bg-white rounded-3xl shadow-md flex flex-col flex-1 overflow-hidden">
             {/* Toolbar */}
             <div className="p-8 pb-6 flex gap-4 items-center shrink-0">
