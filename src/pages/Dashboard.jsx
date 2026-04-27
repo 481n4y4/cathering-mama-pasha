@@ -43,9 +43,18 @@ function ProductCard({ product, isFav, onToggleFav, onDetailProduk }) {
         hovered ? "shadow-card-hover -translate-y-1" : "shadow-card"
       }`}
     >
-      {/* Gambar / emoji */}
-      <div className="w-full aspect-square bg-pink-5 flex items-center justify-center text-4xl lg:text-5xl">
-        {product.emoji || "🍽️"}
+      {/* Gambar produk dari Cloudinary jika ada, fallback ke emoji */}
+      <div className="w-full aspect-square bg-pink-5 flex items-center justify-center overflow-hidden">
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-4xl lg:text-5xl">{product.emoji || "🍽️"}</span>
+        )}
       </div>
 
       {/* Badge diskon/HOT */}
@@ -137,6 +146,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
       id: apiProduct._id,
       name: apiProduct.nama_produk,
       price: apiProduct.harga,
+      image: apiProduct.gambar || null,
       category: category,
       rating: parseFloat(rating.toFixed(1)),
       emoji: emoji,
@@ -230,9 +240,8 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
   );
 
   const tabs = [
-    { label: "🍿 Snack", key: "Snack" },
-    { label: "🍱 Catering", key: "Catering" },
-    { label: "🔥 Promo", key: "Promo" },
+    { label: "🍿 Snack", key: "Snack", disabled: false },
+    { label: "🍱 Catering", key: "Catering", disabled: false },
   ];
 
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
@@ -287,10 +296,12 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
         </div>
         {/* ── Category Tabs ────────────────────────────────────── */}
         <div className="flex items-center justify-center gap-2.5 mb-5">
-          {tabs.map(({ label, key }) => (
+          {tabs.map(({ label, key, disabled }) => (
             <button
               key={key}
-              onClick={() => setActiveTab(key)}
+              type="button"
+              disabled={disabled}
+              onClick={() => !disabled && setActiveTab(key)}
               className={`flex items-center gap-1.5 px-5 lg:px-7 py-2 lg:py-2.5 rounded-full text-sm lg:text-base font-bold border-2 transition-all duration-200 ${
                 activeTab === key
                   ? "bg-pink-6 text-white border-pink-6"
@@ -318,12 +329,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             <p className="text-sm lg:text-base text-white/85 mb-4 lg:mb-6">
               Semua paket nasi box
             </p>
-            <button
-              disabled
-              className="bg-white text-pink-6 text-sm lg:text-base font-extrabold px-5 lg:px-7 py-2 lg:py-2.5 rounded-full opacity-60 cursor-not-allowed shadow-button"
-            >
-              Pesan Sekarang
-            </button>
           </div>
 
           {/* Emoji mengambang */}
@@ -343,9 +348,7 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
         {/* Grid: 3 kolom HP → 4 kolom desktop */}
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
           {filtered
-            .filter((p) =>
-              activeTab === "Promo" ? p.badge : p.category === activeTab,
-            )
+            .filter((p) => p.category === activeTab)
             .map((p) => (
               <ProductCard
                 key={p.id}
