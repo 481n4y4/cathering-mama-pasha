@@ -16,6 +16,12 @@ const normalizeStatus = (status) => {
   return status;
 };
 
+const formatPhone = (phone) => {
+  if (!phone) return "-";
+  const phoneStr = phone.toString();
+  return phoneStr.startsWith("0") ? phoneStr : `0${phoneStr}`;
+};
+
 export default function DetailPesanan() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -26,10 +32,13 @@ export default function DetailPesanan() {
     return {
       id,
       nama: "-",
+      noTelepon: "-",
+      alamat: "-",
       tanggal: "-",
       pesanan: "-",
       metode: "-",
       total: "-",
+      catatan: "-",
       status: "Sedang diproses",
     };
   }, [id, state]);
@@ -123,19 +132,29 @@ export default function DetailPesanan() {
                   <h2 className="text-lg font-bold text-black mb-4">
                     Informasi Pemesan
                   </h2>
-                  <div className="grid gap-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Nama</span>
-                      <span className="font-bold text-black">{order.nama}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Metode Pembayaran</span>
-                      <span className="font-bold text-black">{order.metode}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Total</span>
-                      <span className="font-bold text-black">{order.total}</span>
-                    </div>
+                  <div className="overflow-hidden rounded-xl border border-pink-1 bg-white">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr className="border-b border-pink-1">
+                          <td className="py-3 px-4 text-gray-500">Nama</td>
+                          <td className="py-3 px-4 text-right font-bold text-black">
+                            {order.nama}
+                          </td>
+                        </tr>
+                        <tr className="border-b border-pink-1">
+                          <td className="py-3 px-4 text-gray-500">No. Telepon</td>
+                          <td className="py-3 px-4 text-right font-bold text-black">
+                            {formatPhone(order.noTelepon)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-4 text-gray-500">Alamat</td>
+                          <td className="py-3 px-4 text-right font-bold text-black">
+                            {order.alamat || "-"}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
@@ -143,21 +162,42 @@ export default function DetailPesanan() {
                   <h2 className="text-lg font-bold text-black mb-4">
                     Rincian Pesanan
                   </h2>
-                  <div className="text-sm text-black whitespace-pre-line leading-relaxed font-bold">
-                    {order.pesanan}
+                  <div className="overflow-hidden rounded-xl border border-pink-1 bg-white">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr className="border-b border-pink-1">
+                          <td className="py-3 px-4 text-gray-500">Pesanan</td>
+                          <td className="py-3 px-4 text-right font-bold text-black whitespace-pre-line">
+                            {order.pesanan}
+                          </td>
+                        </tr>
+                        <tr className="border-b border-pink-1">
+                          <td className="py-3 px-4 text-gray-500">
+                            Metode Pembayaran
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-black">
+                            {order.metode}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-4 text-gray-500">Total</td>
+                          <td className="py-3 px-4 text-right font-bold text-black">
+                            {order.total}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
 
               <div className="bg-[#f9f1f2] rounded-2xl p-5 sm:p-6">
                 <h2 className="text-lg font-bold text-black mb-4">
-                  Catatan Admin
+                  Catatan
                 </h2>
-                <textarea
-                  rows={4}
-                  className="w-full bg-white rounded-xl border border-pink-1 p-4 text-sm text-black focus:outline-none focus:ring-2 focus:ring-pink-300"
-                  placeholder="Tambahkan catatan internal untuk pesanan ini..."
-                />
+                <div className="w-full bg-white rounded-xl border border-pink-1 p-4 text-sm text-black whitespace-pre-line">
+                  {order.catatan || "-"}
+                </div>
               </div>
 
               <div className="flex justify-center sm:justify-end">

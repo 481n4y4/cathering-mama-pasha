@@ -74,10 +74,13 @@ const KelolaPesanan = () => {
         return {
           id: order._id,
           nama: order.user?.nama_user || "User",
+          noTelepon: order.user?.no_telepon || "",
+          alamat: order.user?.alamat || "",
           tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
           pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
           metode: order.metode_pembayaran,
           total: `Rp ${Number(order.total_harga || 0).toLocaleString("id-ID")}`,
+          catatan: order.pesan || order.catatan || "-",
           status: normalizedStatus,
           statusColor:
             statusColorMap[normalizedStatus] || "bg-gray-200 text-gray-700",
