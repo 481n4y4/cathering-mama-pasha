@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
@@ -9,20 +9,38 @@ export default function NavbarAfter({
 }) {
   const [hoverProfile, setHoverProfile] = useState(false);
   const [hoverCart, setHoverCart] = useState(false);
+  const [profileUser, setProfileUser] = useState(null);
   const navigate = useNavigate();
 
-  const handleProfilClick = () => {
+  const getStoredUser = () => {
     const rawUser = localStorage.getItem("user");
-    const userData = rawUser
-      ? (() => {
-          try {
-            return JSON.parse(rawUser);
-          } catch {
-            return null;
-          }
-        })()
-      : null;
-    if (userData?.role === "admin") {
+    if (!rawUser) return null;
+    try {
+      return JSON.parse(rawUser);
+    } catch {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const syncUser = () => {
+      setProfileUser(getStoredUser());
+    };
+
+    syncUser();
+    window.addEventListener("auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
+
+  const handleProfilClick = () => {
+    if (profileUser?.role === "admin") {
       navigate("/admin/statistik");
       return;
     }
@@ -39,6 +57,17 @@ export default function NavbarAfter({
     navigate("/keranjang");
   };
 
+  const profilePhoto =
+    profileUser?.foto_profile || profileUser?.photo || logoMamaPasha;
+  const profileName =
+    profileUser?.nama_user || profileUser?.username || "User";
+  const profileInitials = profileName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <div className="sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
       <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-3 bg-white rounded-full border border-pink-2 shadow-nav">
@@ -52,8 +81,16 @@ export default function NavbarAfter({
               hoverProfile ? "bg-pink-1" : "bg-pink-5"
             }`}
           >
-            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-linear-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
-              MP
+            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full overflow-hidden bg-linear-to-br from-pink-2 to-pink-6 flex items-center justify-center text-white text-[10px] lg:text-xs font-extrabold shrink-0">
+              {profilePhoto ? (
+                <img
+                  src={profilePhoto}
+                  alt="Foto profil"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{profileInitials}</span>
+              )}
             </div>
             <span className="text-[11px] lg:text-sm font-bold text-text-dark whitespace-nowrap">
               Profil Anda

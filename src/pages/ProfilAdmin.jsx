@@ -80,7 +80,7 @@ export default function ProfilAdmin() {
 
             <button
               onClick={() => setShowEdit(true)}
-              className="mt-6 px-6 py-3 rounded-full font-bold text-white text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
+              className="mt-6 mx-auto block px-6 py-3 rounded-full font-bold text-white text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
               style={{ background: "linear-gradient(90deg, #B8445E, #E47990)" }}
             >
               ✏️ Edit Profil
