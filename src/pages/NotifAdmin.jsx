@@ -1,45 +1,66 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
-import { FileText, Truck, Frown, Check, MoreHorizontal } from "lucide-react";
-
-const notifData = [
-  {
-    id: 1,
-    title: "Ada yang pesan Risol Mayonaise nih",
-    desc: "Segera siapkan pesanan ini yuk!",
-    time: "Baru saja",
-    iconBg: "bg-[#4da9f6]", // Biru
-    Icon: FileText,
-  },
-  {
-    id: 2,
-    title: "Driver sedang dalam perjalanan",
-    desc: "75 Sosis Solo sedang diantarkan menuju alamat pembeli",
-    time: "15 menit lalu",
-    iconBg: "bg-[#f6c352]", // Kuning
-    Icon: Truck,
-  },
-  {
-    id: 3,
-    title: "Pesanan Telah Dibatalkan",
-    desc: "60 Dadar Gulung dibatalkan oleh pembeli",
-    time: "Kemarin",
-    iconBg: "bg-[#c94b4b]", // Merah
-    Icon: Frown,
-  },
-  {
-    id: 4,
-    title: "Pesanan Selesai",
-    desc: "100 Tahu Bakso sudah sampai ditujuan dan diterima oleh pembeli",
-    time: "2 hari lalu",
-    iconBg: "bg-[#6bb66b]", // Hijau
-    Icon: Check,
-  },
-];
+import { FileText, MessageCircle, X } from "lucide-react";
+import { closeNotification, getAdminNotifications } from "../services/api";
 
 const NotifAdmin = () => {
   const [activeTab, setActiveTab] = useState("Semua");
+  const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await getAdminNotifications();
+        if (isMounted) {
+          setNotifications(response?.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to load admin notifications:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchNotifications();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const notifData = useMemo(() => {
+    return notifications.map((notif) => {
+      const isComment = notif.type === "comment";
+      return {
+        id: notif._id,
+        title: notif.title,
+        desc: notif.message,
+        time: new Date(notif.createdAt).toLocaleString("id-ID"),
+        iconBg: isComment ? "bg-[#f6c352]" : "bg-[#4da9f6]",
+        Icon: isComment ? MessageCircle : FileText,
+        isRead: notif.is_read,
+      };
+    });
+  }, [notifications]);
+
+  const filteredData =
+    activeTab === "Belum dibaca"
+      ? notifData.filter((item) => !item.isRead)
+      : notifData;
+
+  const handleClose = async (id) => {
+    try {
+      await closeNotification(id);
+      setNotifications((prev) => prev.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error("Failed to close notification:", error);
+    }
+  };
 
   return (
     <SidebarAdmin title="Notifikasi">
@@ -78,7 +99,17 @@ const NotifAdmin = () => {
 
         {/* Notifications List */}
         <div className="px-10 pb-10 flex-1 overflow-auto flex flex-col gap-5">
-          {notifData.map((notif) => (
+          {isLoading && (
+            <div className="text-gray-700 font-medium">
+              Memuat notifikasi...
+            </div>
+          )}
+          {!isLoading && filteredData.length === 0 && (
+            <div className="text-gray-700 font-medium">
+              Belum ada notifikasi.
+            </div>
+          )}
+          {filteredData.map((notif) => (
             <div
               key={notif.id}
               className="bg-[#f4d8de] rounded-3xl p-6 sm:px-8 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center gap-6 shadow-sm border border-white/40 relative hover:bg-[#eed0d5] transition-colors"
@@ -102,9 +133,19 @@ const NotifAdmin = () => {
 
               {/* Time */}
               <div className="absolute sm:relative top-6 right-6 sm:top-auto sm:right-auto self-start">
-                <span className="text-gray-700 font-medium text-sm">
-                  {notif.time}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-700 font-medium text-sm">
+                    {notif.time}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleClose(notif.id)}
+                    className="p-1 rounded-full hover:bg-white/70 transition-colors"
+                    aria-label="Tutup notifikasi"
+                  >
+                    <X className="w-4 h-4 text-gray-700" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

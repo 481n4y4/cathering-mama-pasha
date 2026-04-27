@@ -283,6 +283,74 @@ export const updateOrderStatus = async ({ orderId, status }) => {
   }
 };
 
+export const getAdminNotifications = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/notifications/admin", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching admin notifications:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const getUserNotifications = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/notifications/my", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user notifications:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const markNotificationRead = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.patch(
+      `/api/notifications/${id}/read`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error marking notification read:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const closeNotification = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.patch(
+      `/api/notifications/${id}/close`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error closing notification:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");

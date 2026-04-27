@@ -1,65 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
-
-const notifikasiData = [
-  {
-    id: 1,
-    judul: "Nikmati Diskon 20% Semua Snack!",
-    deskripsi:
-      "Ayo pesan snack favoritmu, diskon terbatas sampai akhir bulan ini.",
-    waktu: "Baru saja",
-    warna: "bg-orange-400",
-    tipe: "Promo",
-    aksi: null,
-  },
-  {
-    id: 2,
-    judul: "Risol Mayo Sedang Dikirim",
-    deskripsi: "Pesananmu sedang dalam perjalanan, tunggu sebentar lagi ya!",
-    waktu: "15 menit lalu",
-    warna: "bg-yellow-400",
-    tipe: "Pesan",
-    aksi: null,
-  },
-  {
-    id: 3,
-    judul: "Pesanan Telah Selesai!",
-    deskripsi: "Tahu Baksomu telah sukses diantar. Yuk beri rating!",
-    waktu: "Kemarin",
-    warna: "bg-green-500",
-    tipe: "Pesan",
-    aksi: "Beri Rating",
-  },
-  {
-    id: 4,
-    judul: "Promo Gratis Ongkir Minggu Ini!",
-    deskripsi:
-      "Nikmati gratis ongkir untuk semua pesanan minggu ini. S&K berlaku.",
-    waktu: "2 hari lalu",
-    warna: "bg-pink-4",
-    tipe: "Promo",
-    aksi: null,
-  },
-  {
-    id: 5,
-    judul: "Order #MPX28752 Telah Dibatalkan",
-    deskripsi: "Pesanan Sosis Solomu telah dibatalkan. Yuk coba pesan lagi!",
-    waktu: "2 minggu lalu",
-    warna: "bg-pink-6",
-    tipe: "Pesan",
-    aksi: null,
-  },
-];
+import { getUserNotifications } from "../services/api";
 
 export default function Notifikasi({ onNavigate }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Semua");
+  const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const tabs = ["Semua", "Promo", "Pesan"];
   const filtered =
     activeTab === "Semua"
-      ? notifikasiData
-      : notifikasiData.filter((n) => n.tipe === activeTab);
+      ? notifications
+      : notifications.filter((n) => n.tipe === activeTab);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await getUserNotifications();
+        if (!isMounted) {
+          return;
+        }
+
+        const mapped = (response?.data || []).map((notif) => {
+          const type = notif.type === "status" ? "Pesan" : "Promo";
+          return {
+            id: notif._id,
+            judul: notif.title,
+            deskripsi: notif.message,
+            waktu: new Date(notif.createdAt).toLocaleString("id-ID"),
+            warna: type === "Pesan" ? "bg-green-500" : "bg-orange-400",
+            tipe: type,
+            aksi: null,
+          };
+        });
+
+        setNotifications(mapped);
+      } catch (error) {
+        console.error("Failed to load user notifications:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchNotifications();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleNavigate = (path) => {
     if (onNavigate) {
@@ -132,6 +124,12 @@ export default function Notifikasi({ onNavigate }) {
 
           {/* List notifikasi */}
           <div className="flex flex-col gap-3 px-4 lg:px-8 py-4 pb-24 lg:pb-6">
+            {isLoading && (
+              <div className="text-xs text-text-mid">Memuat notifikasi...</div>
+            )}
+            {!isLoading && filtered.length === 0 && (
+              <div className="text-xs text-text-mid">Belum ada notifikasi.</div>
+            )}
             {filtered.map((n) => (
               <div
                 key={n.id}
