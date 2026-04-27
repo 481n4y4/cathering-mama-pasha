@@ -4,32 +4,7 @@ import ProfilLayout from "../components/ProfilLayout";
 
 const formatRp = (n) => "Rp " + n.toLocaleString("id-ID");
 
-const riwayat = [
-  {
-    id: "MPX23901",
-    nama: "Risoles Mayonaise",
-    emoji: "🥟",
-    tanggal: "12 Feb 2026 • 14:32",
-    jumlah: 3,
-    total: 75000,
-    alamat: "Jl. Melati II No. 42",
-    pembayaran: "OVO",
-    status: "Selesai",
-    rated: false,
-  },
-  {
-    id: "MPX23901",
-    nama: "Tahu Bakso",
-    emoji: "🍢",
-    tanggal: "12 Feb 2026 • 14:32",
-    jumlah: 3,
-    total: 75000,
-    alamat: "Jl. Melati II No. 42",
-    pembayaran: "OVO",
-    status: "Selesai",
-    rated: true,
-  },
-];
+const riwayat = [];
 
 function PesananAktif() {
   return (
@@ -45,40 +20,25 @@ function PesananAktif() {
 }
 
 function RiwayatPesanan() {
-  const [filterAktif, setFilterAktif] = useState("Semua");
-  const filters = ["Semua", "Selesai", "Dibatalkan"];
-  const filtered =
-    filterAktif === "Semua"
-      ? riwayat
-      : riwayat.filter((r) => r.status === filterAktif);
+  const navigate = useNavigate();
+  const filtered = riwayat;
 
   return (
     <div className="px-4 lg:px-8 py-5">
-      <p className="text-sm text-text-mid mb-4">
-        Lihat semua pesanan yang sudah selesai atau dibatalkan
-      </p>
-
-      {/* Filter pills */}
-      <div className="flex gap-1 bg-white/40 rounded-full p-1 mb-5 w-fit">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilterAktif(f)}
-            className={`px-5 py-1.5 rounded-full text-sm font-bold transition-all duration-200 ${
-              filterAktif === f
-                ? "bg-pink-6 text-white"
-                : "text-text-dark hover:bg-white/50"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
       {/* List */}
-      <div className="flex flex-col gap-4">
-        {filtered.map((p, i) => (
-          <div key={i} className="bg-white rounded-2xl p-4 shadow-card">
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-6">
+          <div className="text-6xl mb-3 opacity-60">📭</div>
+          <p className="text-text-mid text-sm text-center leading-relaxed">
+            Belum ada riwayat pesanan.
+            <br />
+            Yuk mulai pesan menu favoritmu!
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {filtered.map((p, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 shadow-card">
             {/* Atas */}
             <div className="flex gap-3 mb-3">
               <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-pink-5 flex items-center justify-center text-3xl shrink-0">
@@ -122,7 +82,10 @@ function RiwayatPesanan() {
                 <button className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
                   Lihat Detail
                 </button>
-                <button className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
+                <button
+                  onClick={() => navigate(`/produk/${p.productId}`)}
+                  className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all"
+                >
                   Pesan Lagi
                 </button>
                 <button
@@ -136,9 +99,10 @@ function RiwayatPesanan() {
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
