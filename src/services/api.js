@@ -234,6 +234,55 @@ export const uploadBuktiTransfer = async ({ orderId, file }) => {
   }
 };
 
+export const getUserOrders = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/orders/my", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const getAdminOrders = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/orders/admin", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching admin orders:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const updateOrderStatus = async ({ orderId, status }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.patch(
+      `/api/orders/${orderId}/status`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");

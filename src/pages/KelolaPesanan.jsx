@@ -1,47 +1,101 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
+import { getAdminOrders, updateOrderStatus } from "../services/api";
 
-const pesananData = [
-  {
-    id: 1,
-    nama: "Jeno",
-    tanggal: "Sabtu,\n25 Apr 2026",
-    pesanan: "60 Risoles\nMayonaise",
-    metode: "QRIS",
-    total: "Rp 150.000",
-    status: "Sedang diproses",
-    statusColor: "bg-[#fde28a] text-[#85712e]", // Kuning
-  },
-  {
-    id: 2,
-    nama: "Haikal",
-    tanggal: "Rabu,\n15 Apr 2026",
-    pesanan: "75 Sosis Solo",
-    metode: "QRIS",
-    total: "Rp 112.000",
-    status: "Sedang diantar",
-    statusColor: "bg-[#dd696b] text-white", // Merah
-  },
-  {
-    id: 3,
-    nama: "Jamal",
-    tanggal: "Rabu,\n15 Apr 2026",
-    pesanan: "100 Tahu Bakso",
-    metode: "BRI",
-    total: "Rp 250.000",
-    status: "Selesai",
-    statusColor: "bg-[#6cc765] text-white", // Hijau
-  },
-];
+const statusOptions = ["Pending", "Diproses", "Dalam Pengiriman", "Selesai"];
+
+const formatTanggal = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("id-ID", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const statusColorMap = {
+  Pending: "bg-[#fde28a] text-[#85712e]",
+  Diproses: "bg-[#fde28a] text-[#85712e]",
+  "Dalam Pengiriman": "bg-[#dd696b] text-white",
+  Selesai: "bg-[#6cc765] text-white",
+};
 
 const KelolaPesanan = () => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
 
   const handleDetail = (order) => {
     navigate(`/admin/kelola-pesanan/${order.id}`, { state: { order } });
+  };
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await getAdminOrders();
+        setOrders(response?.data || []);
+      } catch (err) {
+        const message =
+          typeof err === "string"
+            ? err
+            : err?.message || "Gagal memuat pesanan.";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const mappedOrders = useMemo(
+    () =>
+      orders.map((order) => {
+        const firstItem = order.items?.[0];
+        const product = firstItem?.produk || {};
+        return {
+          id: order._id,
+          nama: order.user?.nama_user || "User",
+          tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
+          pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
+          metode: order.metode_pembayaran,
+          total: `Rp ${Number(order.total_harga || 0).toLocaleString("id-ID")}`,
+          status: order.status,
+          statusColor:
+            statusColorMap[order.status] || "bg-gray-200 text-gray-700",
+        };
+      }),
+    [orders],
+  );
+
+  const handleStatusChange = async (orderId, status) => {
+    setUpdatingId(orderId);
+    try {
+      await updateOrderStatus({ orderId, status });
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status } : order,
+        ),
+      );
+    } catch (err) {
+      const message =
+        typeof err === "string"
+          ? err
+          : err?.message || "Gagal memperbarui status.";
+      setError(message);
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   return (
@@ -83,43 +137,67 @@ const KelolaPesanan = () => {
 
             {/* Mobile Cards */}
             <div className="lg:hidden px-5 sm:px-6 pb-6 space-y-4">
-              {pesananData.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-pink-1 bg-[#fff7f8] p-4 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-extrabold text-black">
-                        {item.nama}
-                      </p>
-                      <p className="text-xs text-gray-500 whitespace-pre-line">
-                        {item.tanggal}
-                      </p>
-                    </div>
-                    <span
-                      className={`${item.statusColor} py-1.5 px-3 rounded-xl text-xs font-bold inline-block text-center`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                  <div className="mt-3 text-sm font-bold text-black whitespace-pre-line">
-                    {item.pesanan}
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
-                    <span>
-                      {item.metode === "BRI" ? "BRI" : item.metode}
-                    </span>
-                    <span className="font-bold text-black">{item.total}</span>
-                  </div>
-                  <button
-                    onClick={() => handleDetail(item)}
-                    className="mt-4 w-full bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2.5 rounded-xl transition-colors text-sm"
-                  >
-                    Detail pesanan
-                  </button>
+              {loading ? (
+                <div className="text-sm text-gray-500">Memuat pesanan...</div>
+              ) : error ? (
+                <div className="text-sm text-red-500 font-semibold">
+                  {error}
                 </div>
-              ))}
+              ) : mappedOrders.length === 0 ? (
+                <div className="text-sm text-gray-500">Belum ada pesanan.</div>
+              ) : (
+                mappedOrders.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-pink-1 bg-[#fff7f8] p-4 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-extrabold text-black">
+                          {item.nama}
+                        </p>
+                        <p className="text-xs text-gray-500 whitespace-pre-line">
+                          {item.tanggal}
+                        </p>
+                      </div>
+                      <span
+                        className={`${item.statusColor} py-1.5 px-3 rounded-xl text-xs font-bold inline-block text-center`}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+                    <div className="mt-3 text-sm font-bold text-black whitespace-pre-line">
+                      {item.pesanan}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                      <span>{item.metode === "BRI" ? "BRI" : item.metode}</span>
+                      <span className="font-bold text-black">{item.total}</span>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <select
+                        value={item.status}
+                        onChange={(event) =>
+                          handleStatusChange(item.id, event.target.value)
+                        }
+                        className="bg-white border border-pink-2 text-sm font-semibold rounded-xl px-3 py-2"
+                        disabled={updatingId === item.id}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleDetail(item)}
+                        className="w-full bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2.5 rounded-xl transition-colors text-sm"
+                      >
+                        Detail pesanan
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Table */}
@@ -156,52 +234,97 @@ const KelolaPesanan = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {pesananData.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-6 px-6 font-bold text-black align-middle">
-                        {index + 1}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-black align-middle">
-                        {item.nama}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-black align-middle whitespace-pre-line leading-relaxed">
-                        {item.tanggal}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-black align-middle whitespace-pre-line leading-relaxed">
-                        {item.pesanan}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-black text-center align-middle">
-                        {item.metode === "BRI" ? (
-                          <span className="text-[#0f54a8] text-xl font-extrabold tracking-tighter flex items-center justify-center gap-1">
-                            <span className="text-xl">◨</span>BRI
-                          </span>
-                        ) : (
-                          item.metode
-                        )}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-black align-middle whitespace-nowrap">
-                        {item.total}
-                      </td>
-                      <td className="py-6 px-6 text-center align-middle">
-                        <span
-                          className={`${item.statusColor} py-2 px-4 rounded-xl text-sm font-bold inline-block min-w-[120px] text-center`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="py-6 px-6 text-center align-middle">
-                        <button
-                          onClick={() => handleDetail(item)}
-                          className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
-                        >
-                          Detail pesanan
-                        </button>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="py-10 text-center text-sm text-gray-500"
+                      >
+                        Memuat pesanan...
                       </td>
                     </tr>
-                  ))}
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="py-10 text-center text-sm text-red-500 font-semibold"
+                      >
+                        {error}
+                      </td>
+                    </tr>
+                  ) : mappedOrders.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="py-10 text-center text-sm text-gray-500"
+                      >
+                        Belum ada pesanan.
+                      </td>
+                    </tr>
+                  ) : (
+                    mappedOrders.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-6 px-6 font-bold text-black align-middle">
+                          {index + 1}
+                        </td>
+                        <td className="py-6 px-6 font-bold text-black align-middle">
+                          {item.nama}
+                        </td>
+                        <td className="py-6 px-6 font-bold text-black align-middle whitespace-pre-line leading-relaxed">
+                          {item.tanggal}
+                        </td>
+                        <td className="py-6 px-6 font-bold text-black align-middle whitespace-pre-line leading-relaxed">
+                          {item.pesanan}
+                        </td>
+                        <td className="py-6 px-6 font-bold text-black text-center align-middle">
+                          {item.metode === "BRI" ? (
+                            <span className="text-[#0f54a8] text-xl font-extrabold tracking-tighter flex items-center justify-center gap-1">
+                              <span className="text-xl">◨</span>BRI
+                            </span>
+                          ) : (
+                            item.metode
+                          )}
+                        </td>
+                        <td className="py-6 px-6 font-bold text-black align-middle whitespace-nowrap">
+                          {item.total}
+                        </td>
+                        <td className="py-6 px-6 text-center align-middle">
+                          <span
+                            className={`${item.statusColor} py-2 px-4 rounded-xl text-sm font-bold inline-block min-w-[120px] text-center`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="py-6 px-6 text-center align-middle">
+                          <div className="flex flex-col gap-2 items-center">
+                            <select
+                              value={item.status}
+                              onChange={(event) =>
+                                handleStatusChange(item.id, event.target.value)
+                              }
+                              className="bg-white border border-pink-2 text-sm font-semibold rounded-xl px-3 py-2"
+                              disabled={updatingId === item.id}
+                            >
+                              {statusOptions.map((status) => (
+                                <option key={status} value={status}>
+                                  {status}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => handleDetail(item)}
+                              className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
+                            >
+                              Detail pesanan
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

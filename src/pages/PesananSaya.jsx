@@ -1,12 +1,22 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
+import { getUserOrders } from "../services/api";
 
 const formatRp = (n) => "Rp " + n.toLocaleString("id-ID");
 
-const riwayat = [];
+const formatTanggal = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
-function PesananAktif() {
+function PesananAktif({ orders }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6">
       <div className="text-8xl mb-4 opacity-60">🛍️</div>
@@ -19,9 +29,9 @@ function PesananAktif() {
   );
 }
 
-function RiwayatPesanan() {
+function RiwayatPesanan({ orders }) {
   const navigate = useNavigate();
-  const filtered = riwayat;
+  const filtered = orders;
 
   return (
     <div className="px-4 lg:px-8 py-5">
@@ -39,66 +49,66 @@ function RiwayatPesanan() {
         <div className="flex flex-col gap-4">
           {filtered.map((p, i) => (
             <div key={i} className="bg-white rounded-2xl p-4 shadow-card">
-            {/* Atas */}
-            <div className="flex gap-3 mb-3">
-              <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-pink-5 flex items-center justify-center text-3xl shrink-0">
-                {p.emoji}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-extrabold text-text-dark text-sm lg:text-base">
-                    {p.nama}
-                  </p>
-                  <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-green-500 text-white shrink-0">
-                    {p.status}
-                  </span>
+              {/* Atas */}
+              <div className="flex gap-3 mb-3">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-pink-5 flex items-center justify-center text-3xl shrink-0">
+                  {p.emoji}
                 </div>
-                <p className="text-xs text-text-mid mt-0.5">{p.tanggal}</p>
-                <p className="text-xs text-text-mid">Order ID: {p.id}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-extrabold text-text-dark text-sm lg:text-base">
+                      {p.nama}
+                    </p>
+                    <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-green-500 text-white shrink-0">
+                      {p.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-mid mt-0.5">{p.tanggal}</p>
+                  <p className="text-xs text-text-mid">Order ID: {p.id}</p>
+                </div>
               </div>
-            </div>
 
-            <div className="border-t border-pink-1 my-3" />
+              <div className="border-t border-pink-1 my-3" />
 
-            {/* Bawah */}
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs text-text-mid">{p.jumlah} Item:</p>
-                <p className="text-[11px] font-extrabold text-text-dark tracking-wide mt-0.5">
-                  💳 RIWAYAT: {p.pembayaran}
-                </p>
+              {/* Bawah */}
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-xs text-text-mid">{p.jumlah} Item:</p>
+                  <p className="text-[11px] font-extrabold text-text-dark tracking-wide mt-0.5">
+                    💳 {p.pembayaran}
+                  </p>
+                </div>
+                <div className="lg:text-right">
+                  <p className="text-xs text-text-mid">
+                    Total{" "}
+                    <span className="font-extrabold text-text-dark">
+                      {formatRp(p.total)}
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-text-mid">{p.alamat}</p>
+                </div>
+                {/* Tombol aksi */}
+                <div className="flex gap-1.5 flex-wrap">
+                  <button className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
+                    Lihat Detail
+                  </button>
+                  <button
+                    onClick={() => navigate(`/produk/${p.productId}`)}
+                    className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all"
+                  >
+                    Pesan Lagi
+                  </button>
+                  <button
+                    className={`text-[11px] font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all flex items-center gap-1 ${
+                      p.rated
+                        ? "border border-yellow-400 text-yellow-600 bg-yellow-50"
+                        : "border border-pink-2 text-text-dark hover:bg-pink-5"
+                    }`}
+                  >
+                    {p.rated && <span>⭐</span>} Beri Rating
+                  </button>
+                </div>
               </div>
-              <div className="lg:text-right">
-                <p className="text-xs text-text-mid">
-                  Total{" "}
-                  <span className="font-extrabold text-text-dark">
-                    {formatRp(p.total)}
-                  </span>
-                </p>
-                <p className="text-[10px] text-text-mid">{p.alamat}</p>
-              </div>
-              {/* Tombol aksi */}
-              <div className="flex gap-1.5 flex-wrap">
-                <button className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
-                  Lihat Detail
-                </button>
-                <button
-                  onClick={() => navigate(`/produk/${p.productId}`)}
-                  className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all"
-                >
-                  Pesan Lagi
-                </button>
-                <button
-                  className={`text-[11px] font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all flex items-center gap-1 ${
-                    p.rated
-                      ? "border border-yellow-400 text-yellow-600 bg-yellow-50"
-                      : "border border-pink-2 text-text-dark hover:bg-pink-5"
-                  }`}
-                >
-                  {p.rated && <span>⭐</span>} Beri Rating
-                </button>
-              </div>
-            </div>
             </div>
           ))}
         </div>
@@ -110,6 +120,63 @@ function RiwayatPesanan() {
 export default function PesananSaya({ onNavigate }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("aktif");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await getUserOrders();
+        setOrders(response?.data || []);
+      } catch (err) {
+        const message =
+          typeof err === "string"
+            ? err
+            : err?.message || "Gagal memuat pesanan.";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const mappedOrders = useMemo(
+    () =>
+      orders.map((order) => {
+        const firstItem = order.items?.[0];
+        const product = firstItem?.produk || {};
+        const qty = order.jumlah_produk || 0;
+        return {
+          id: order._id,
+          nama: product.nama_produk || "Pesanan",
+          emoji: product.emoji || "🍱",
+          status: order.status,
+          tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
+          pembayaran: order.metode_pembayaran,
+          total: order.total_harga || 0,
+          alamat: "",
+          jumlah: qty,
+          productId: product._id,
+          rated: false,
+        };
+      }),
+    [orders],
+  );
+
+  const activeOrders = useMemo(
+    () => mappedOrders.filter((order) => order.status !== "Selesai"),
+    [mappedOrders],
+  );
+
+  const historyOrders = useMemo(
+    () => mappedOrders.filter((order) => order.status === "Selesai"),
+    [mappedOrders],
+  );
 
   const handleNavigate = (path) => {
     if (onNavigate) {
@@ -177,7 +244,25 @@ export default function PesananSaya({ onNavigate }) {
         ))}
       </div>
 
-      {activeTab === "aktif" ? <PesananAktif /> : <RiwayatPesanan />}
+      {loading ? (
+        <div className="flex items-center justify-center py-16 text-sm text-text-mid">
+          Memuat pesanan...
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center py-16 text-sm text-red-500 font-semibold">
+          {error}
+        </div>
+      ) : activeTab === "aktif" ? (
+        activeOrders.length === 0 ? (
+          <PesananAktif orders={activeOrders} />
+        ) : (
+          <RiwayatPesanan orders={activeOrders} />
+        )
+      ) : historyOrders.length === 0 ? (
+        <RiwayatPesanan orders={historyOrders} />
+      ) : (
+        <RiwayatPesanan orders={historyOrders} />
+      )}
     </ProfilLayout>
   );
 }
