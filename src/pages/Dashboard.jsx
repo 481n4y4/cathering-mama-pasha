@@ -235,7 +235,6 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     { label: "🔥 Promo", key: "Promo" },
   ];
 
-
   const ActiveNavbar = isLoggedIn ? NavbarAfter : NavbarBefore;
 
   // Show loading state
@@ -319,7 +318,10 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
             <p className="text-sm lg:text-base text-white/85 mb-4 lg:mb-6">
               Semua paket nasi box
             </p>
-            <button className="bg-white text-pink-6 text-sm lg:text-base font-extrabold px-5 lg:px-7 py-2 lg:py-2.5 rounded-full hover:scale-105 transition-transform shadow-button">
+            <button
+              disabled
+              className="bg-white text-pink-6 text-sm lg:text-base font-extrabold px-5 lg:px-7 py-2 lg:py-2.5 rounded-full opacity-60 cursor-not-allowed shadow-button"
+            >
               Pesan Sekarang
             </button>
           </div>
