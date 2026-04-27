@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
-import { getAdminOrders, updateOrderStatus } from "../services/api";
+import { getAdminOrders } from "../services/api";
 
-const statusOptions = ["Pending", "Diproses", "Dalam Pengiriman", "Selesai"];
+const statusOptions = ["Diproses", "Selesai"];
 
 const formatTanggal = (value) => {
   if (!value) return "";
@@ -20,10 +20,17 @@ const formatTanggal = (value) => {
 };
 
 const statusColorMap = {
-  Pending: "bg-[#fde28a] text-[#85712e]",
   Diproses: "bg-[#fde28a] text-[#85712e]",
-  "Dalam Pengiriman": "bg-[#dd696b] text-white",
   Selesai: "bg-[#6cc765] text-white",
+};
+
+const normalizeStatus = (status) => {
+  if (!status) return "Diproses";
+  if (status === "Pending") return "Diproses";
+  if (status === "Dalam Pengiriman" || status === "Sedang diantar") {
+    return "Diproses";
+  }
+  return status;
 };
 
 const KelolaPesanan = () => {
@@ -31,7 +38,7 @@ const KelolaPesanan = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [updatingId, setUpdatingId] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("Semua");
 
   const handleDetail = (order) => {
     navigate(`/admin/kelola-pesanan/${order.id}`, { state: { order } });
@@ -63,6 +70,7 @@ const KelolaPesanan = () => {
       orders.map((order) => {
         const firstItem = order.items?.[0];
         const product = firstItem?.produk || {};
+        const normalizedStatus = normalizeStatus(order.status);
         return {
           id: order._id,
           nama: order.user?.nama_user || "User",
@@ -70,33 +78,18 @@ const KelolaPesanan = () => {
           pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
           metode: order.metode_pembayaran,
           total: `Rp ${Number(order.total_harga || 0).toLocaleString("id-ID")}`,
-          status: order.status,
+          status: normalizedStatus,
           statusColor:
-            statusColorMap[order.status] || "bg-gray-200 text-gray-700",
+            statusColorMap[normalizedStatus] || "bg-gray-200 text-gray-700",
         };
       }),
     [orders],
   );
 
-  const handleStatusChange = async (orderId, status) => {
-    setUpdatingId(orderId);
-    try {
-      await updateOrderStatus({ orderId, status });
-      setOrders((prev) =>
-        prev.map((order) =>
-          order._id === orderId ? { ...order, status } : order,
-        ),
-      );
-    } catch (err) {
-      const message =
-        typeof err === "string"
-          ? err
-          : err?.message || "Gagal memperbarui status.";
-      setError(message);
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+  const filteredOrders = useMemo(() => {
+    if (filterStatus === "Semua") return mappedOrders;
+    return mappedOrders.filter((order) => order.status === filterStatus);
+  }, [filterStatus, mappedOrders]);
 
   return (
     <SidebarAdmin title="Kelola Pesanan">
@@ -125,11 +118,17 @@ const KelolaPesanan = () => {
                 />
               </div>
               <div className="relative w-full lg:w-auto lg:ml-auto">
-                <select className="bg-[#f2e4e6] w-full lg:w-auto text-black font-semibold py-3.5 pl-6 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-pink-300 appearance-none cursor-pointer">
-                  <option>Semua Status</option>
-                  <option>Sedang diproses</option>
-                  <option>Sedang diantar</option>
-                  <option>Selesai</option>
+                <select
+                  value={filterStatus}
+                  onChange={(event) => setFilterStatus(event.target.value)}
+                  className="bg-[#f2e4e6] w-full lg:w-auto text-black font-semibold py-3.5 pl-6 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-pink-300 appearance-none cursor-pointer"
+                >
+                  <option value="Semua">Semua Status</option>
+                  {statusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="w-5 h-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-black pointer-events-none" />
               </div>
@@ -143,10 +142,10 @@ const KelolaPesanan = () => {
                 <div className="text-sm text-red-500 font-semibold">
                   {error}
                 </div>
-              ) : mappedOrders.length === 0 ? (
+              ) : filteredOrders.length === 0 ? (
                 <div className="text-sm text-gray-500">Belum ada pesanan.</div>
               ) : (
-                mappedOrders.map((item) => (
+                filteredOrders.map((item) => (
                   <div
                     key={item.id}
                     className="rounded-2xl border border-pink-1 bg-[#fff7f8] p-4 shadow-sm"
@@ -173,21 +172,7 @@ const KelolaPesanan = () => {
                       <span>{item.metode === "BRI" ? "BRI" : item.metode}</span>
                       <span className="font-bold text-black">{item.total}</span>
                     </div>
-                    <div className="mt-4 flex flex-col gap-2">
-                      <select
-                        value={item.status}
-                        onChange={(event) =>
-                          handleStatusChange(item.id, event.target.value)
-                        }
-                        className="bg-white border border-pink-2 text-sm font-semibold rounded-xl px-3 py-2"
-                        disabled={updatingId === item.id}
-                      >
-                        {statusOptions.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="mt-4">
                       <button
                         onClick={() => handleDetail(item)}
                         className="w-full bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2.5 rounded-xl transition-colors text-sm"
@@ -252,7 +237,7 @@ const KelolaPesanan = () => {
                         {error}
                       </td>
                     </tr>
-                  ) : mappedOrders.length === 0 ? (
+                  ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td
                         colSpan={8}
@@ -262,7 +247,7 @@ const KelolaPesanan = () => {
                       </td>
                     </tr>
                   ) : (
-                    mappedOrders.map((item, index) => (
+                    filteredOrders.map((item, index) => (
                       <tr
                         key={item.id}
                         className="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors"
@@ -299,28 +284,12 @@ const KelolaPesanan = () => {
                           </span>
                         </td>
                         <td className="py-6 px-6 text-center align-middle">
-                          <div className="flex flex-col gap-2 items-center">
-                            <select
-                              value={item.status}
-                              onChange={(event) =>
-                                handleStatusChange(item.id, event.target.value)
-                              }
-                              className="bg-white border border-pink-2 text-sm font-semibold rounded-xl px-3 py-2"
-                              disabled={updatingId === item.id}
-                            >
-                              {statusOptions.map((status) => (
-                                <option key={status} value={status}>
-                                  {status}
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              onClick={() => handleDetail(item)}
-                              className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
-                            >
-                              Detail pesanan
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleDetail(item)}
+                            className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
+                          >
+                            Detail pesanan
+                          </button>
                         </td>
                       </tr>
                     ))

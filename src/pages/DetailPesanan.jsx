@@ -2,12 +2,19 @@ import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
+import { updateOrderStatus } from "../services/api";
 
-const STATUS_OPTIONS = [
-  "Sedang diproses",
-  "Dalam pengiriman",
-  "Selesai",
-];
+const STATUS_OPTIONS = ["Diproses", "Selesai"];
+
+const normalizeStatus = (status) => {
+  if (!status) return "Diproses";
+  if (status === "Pending") return "Diproses";
+  if (status === "Dalam Pengiriman" || status === "Sedang diantar") {
+    return "Diproses";
+  }
+  if (status === "Sedang diproses") return "Diproses";
+  return status;
+};
 
 export default function DetailPesanan() {
   const navigate = useNavigate();
@@ -27,11 +34,27 @@ export default function DetailPesanan() {
     };
   }, [id, state]);
 
-  const initialStatus =
-    order.status === "Sedang diantar"
-      ? "Dalam pengiriman"
-      : order.status || "Sedang diproses";
-  const [status, setStatus] = useState(initialStatus);
+  const [status, setStatus] = useState(normalizeStatus(order.status));
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  const handleSave = async () => {
+    if (!order.id) return;
+    setSaving(true);
+    setMessage({ type: "", text: "" });
+    try {
+      await updateOrderStatus({ orderId: order.id, status });
+      setMessage({ type: "success", text: "Status pesanan diperbarui." });
+    } catch (err) {
+      const text =
+        typeof err === "string"
+          ? err
+          : err?.message || "Gagal memperbarui status.";
+      setMessage({ type: "error", text });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <SidebarAdmin title="Detail Pesanan">
@@ -83,6 +106,18 @@ export default function DetailPesanan() {
                 </div>
               </div>
 
+              {message.text && (
+                <div
+                  className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
+                    message.type === "success"
+                      ? "bg-green-50 text-green-700"
+                      : "bg-red-50 text-red-600"
+                  }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-[#f9f1f2] rounded-2xl p-5 sm:p-6">
                   <h2 className="text-lg font-bold text-black mb-4">
@@ -126,8 +161,12 @@ export default function DetailPesanan() {
               </div>
 
               <div className="flex justify-center sm:justify-end">
-                <button className="w-full sm:w-auto bg-[#de6a84] hover:bg-[#c85a74] text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm">
-                  Simpan Perubahan
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full sm:w-auto bg-[#de6a84] hover:bg-[#c85a74] text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm disabled:opacity-60"
+                >
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
               </div>
             </div>

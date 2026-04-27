@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import { getUserOrders } from "../services/api";
@@ -14,6 +14,16 @@ const formatTanggal = (value) => {
     month: "short",
     year: "numeric",
   });
+};
+
+const normalizeStatus = (status) => {
+  if (!status) return "Diproses";
+  if (status === "Pending") return "Diproses";
+  if (status === "Dalam Pengiriman" || status === "Sedang diantar") {
+    return "Diproses";
+  }
+  if (status === "Sedang diproses") return "Diproses";
+  return status;
 };
 
 function PesananAktif({ orders }) {
@@ -124,26 +134,50 @@ export default function PesananSaya({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const fetchOrders = useCallback(async (showLoading = true) => {
+    if (showLoading) {
       setLoading(true);
-      setError("");
-      try {
-        const response = await getUserOrders();
-        setOrders(response?.data || []);
-      } catch (err) {
-        const message =
-          typeof err === "string"
-            ? err
-            : err?.message || "Gagal memuat pesanan.";
-        setError(message);
-      } finally {
+    }
+    setError("");
+    try {
+      const response = await getUserOrders();
+      setOrders(response?.data || []);
+    } catch (err) {
+      const message =
+        typeof err === "string"
+          ? err
+          : err?.message || "Gagal memuat pesanan.";
+      setError(message);
+    } finally {
+      if (showLoading) {
         setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders(true);
+
+    const intervalId = setInterval(() => {
+      fetchOrders(false);
+    }, 30000);
+
+    const handleFocus = () => fetchOrders(false);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchOrders(false);
       }
     };
 
-    fetchOrders();
-  }, []);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchOrders]);
 
   const mappedOrders = useMemo(
     () =>
@@ -151,11 +185,12 @@ export default function PesananSaya({ onNavigate }) {
         const firstItem = order.items?.[0];
         const product = firstItem?.produk || {};
         const qty = order.jumlah_produk || 0;
+        const normalizedStatus = normalizeStatus(order.status);
         return {
           id: order._id,
           nama: product.nama_produk || "Pesanan",
           emoji: product.emoji || "🍱",
-          status: order.status,
+          status: normalizedStatus,
           tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
           pembayaran: order.metode_pembayaran,
           total: order.total_harga || 0,

@@ -68,11 +68,7 @@ export default function ProfilAdmin() {
         <NavbarProfile page="/admin/statistik" />
 
         <section className="py-5 px-10">
-          <h1 className="text-3xl font-semibold mb-8 text-gray-900">
-            Profil Admin
-          </h1>
-
-          <div className="max-w-2xl bg-white rounded-3xl p-6 shadow-md">
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl p-6 shadow-md">
             <h2 className="text-lg font-extrabold text-[#B8445E] mb-4">
               Informasi Akun
             </h2>
