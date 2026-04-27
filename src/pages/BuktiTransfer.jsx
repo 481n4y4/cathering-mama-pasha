@@ -13,7 +13,6 @@ export default function BuktiTransfer() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const langkah = useMemo(
     () => [
@@ -26,6 +25,7 @@ export default function BuktiTransfer() {
 
   const handleUpload = async () => {
     setError("");
+
     if (!orderId) {
       setError("Order tidak ditemukan. Silakan buat pesanan ulang.");
       return;
@@ -38,7 +38,10 @@ export default function BuktiTransfer() {
     setLoading(true);
     try {
       await uploadBuktiTransfer({ orderId, file });
-      setSuccess(true);
+      navigate("/pesanan-saya", {
+        replace: true,
+        state: { uploadSuccess: true },
+      });
     } catch (err) {
       const message =
         typeof err === "string"
@@ -117,11 +120,6 @@ export default function BuktiTransfer() {
           )}
           {error && (
             <p className="mt-2 text-xs text-red-500 font-semibold">{error}</p>
-          )}
-          {success && (
-            <p className="mt-2 text-xs text-green-600 font-semibold">
-              Bukti transfer berhasil diupload.
-            </p>
           )}
         </div>
       </div>

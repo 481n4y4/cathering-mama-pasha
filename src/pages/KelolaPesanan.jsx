@@ -79,6 +79,7 @@ const KelolaPesanan = () => {
           tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
           pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
           metode: order.metode_pembayaran,
+          buktiTransfer: order.bukti_transfer || "",
           total: `Rp ${Number(order.total_harga || 0).toLocaleString("id-ID")}`,
           catatan: order.pesan || order.catatan || "-",
           status: normalizedStatus,
@@ -140,7 +141,9 @@ const KelolaPesanan = () => {
                     {error}
                   </div>
                 ) : filteredOrders.length === 0 ? (
-                  <div className="text-sm text-gray-500">Belum ada pesanan.</div>
+                  <div className="text-sm text-gray-500">
+                    Belum ada pesanan.
+                  </div>
                 ) : (
                   filteredOrders.map((item) => (
                     <div
@@ -166,8 +169,12 @@ const KelolaPesanan = () => {
                         {item.pesanan}
                       </div>
                       <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
-                        <span>{item.metode === "BRI" ? "BRI" : item.metode}</span>
-                        <span className="font-bold text-black">{item.total}</span>
+                        <span>
+                          {item.metode === "BRI" ? "BRI" : item.metode}
+                        </span>
+                        <span className="font-bold text-black">
+                          {item.total}
+                        </span>
                       </div>
                       <div className="mt-4">
                         <button
@@ -275,7 +282,7 @@ const KelolaPesanan = () => {
                           </td>
                           <td className="py-4 px-6 text-center align-middle">
                             <span
-                              className={`${item.statusColor} py-1.5 px-4 rounded-xl text-sm font-bold inline-block min-w-[120px] text-center`}
+                              className={`${item.statusColor} py-1.5 px-4 rounded-xl text-sm font-bold inline-block min-w-30 text-center`}
                             >
                               {item.status}
                             </span>
@@ -283,7 +290,7 @@ const KelolaPesanan = () => {
                           <td className="py-4 px-6 text-center align-middle">
                             <button
                               onClick={() => handleDetail(item)}
-                              className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-[140px]"
+                              className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center mx-auto min-w-35"
                             >
                               Detail pesanan
                             </button>

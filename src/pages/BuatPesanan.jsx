@@ -4,6 +4,7 @@ import {
   checkCheckoutDate,
   createOrder,
   getCart,
+  getUserById,
   paymentMidtrans,
 } from "../services/api";
 
@@ -22,7 +23,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState("");
   const [cartSubtotal, setCartSubtotal] = useState(null);
-  const [profileUser, setProfileUser] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
 
   const fallbackItem = produk ?? {
     nama: "Risoles Mayonaise",
@@ -54,39 +55,6 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     now.setDate(now.getDate() + 3);
     return now.toISOString().slice(0, 10);
   }, []);
-
-  useEffect(() => {
-    const syncUser = () => {
-      const rawUser = localStorage.getItem("user");
-      if (!rawUser) {
-        setProfileUser(null);
-        return;
-      }
-      try {
-        setProfileUser(JSON.parse(rawUser));
-      } catch {
-        setProfileUser(null);
-      }
-    };
-
-    syncUser();
-    window.addEventListener("auth-changed", syncUser);
-    window.addEventListener("storage", syncUser);
-    window.addEventListener("focus", syncUser);
-
-    return () => {
-      window.removeEventListener("auth-changed", syncUser);
-      window.removeEventListener("storage", syncUser);
-      window.removeEventListener("focus", syncUser);
-    };
-  }, []);
-
-  const displayName =
-    profileUser?.nama_user || profileUser?.nama || profileUser?.username || "-";
-  const displayPhone = profileUser?.no_telepon
-    ? `(+62) ${String(profileUser.no_telepon).replace(/^0/, "")}`
-    : "-";
-  const displayAddress = profileUser?.alamat || "-";
 
   const formatTanggal = (value) => {
     if (!value) return "";
@@ -134,6 +102,28 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     };
 
     fetchCart();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const cachedUser = localStorage.getItem("user");
+        if (!cachedUser) return;
+
+        const parsedUser = JSON.parse(cachedUser);
+        const userId = parsedUser?._id || parsedUser?.id;
+        if (!userId) return;
+
+        const response = await getUserById(userId);
+        if (response?.success && response?.data) {
+          setUserInfo(response.data);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data user:", err);
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
   const handleTanggalChange = async (value) => {
@@ -197,6 +187,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
         navigate("/bukti-transfer", {
           state: {
             orderId,
+            metodePembayaran,
             noRekeningPenjual: orderResponse?.data?.no_rekening_penjual,
             paymentInstruction: orderResponse?.data?.payment_instruction,
           },
@@ -254,15 +245,17 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
                 <i className="fa-solid fa-location-dot"></i>
               </span>
               <span className="font-extrabold text-pink-6 text-base">
-                {displayName}
+                {userInfo?.nama_user || "Pengguna"}
               </span>
-              <span className="text-gray-400 text-sm">{displayPhone}</span>
+              <span className="text-gray-400 text-sm">
+                {userInfo?.no_telepon || "No. telepon belum diisi"}
+              </span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
-              {displayAddress}
+              {userInfo?.alamat || "Alamat belum diisi"}
             </p>
           </div>
-          <div className="flex-shrink-0 text-gray-400">
+          <div className="shrink-0 text-gray-400">
             <i className="fa-solid fa-angle-right"></i>
           </div>
         </div>
@@ -276,17 +269,28 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
           ) : (
             <div className="flex flex-col gap-3">
               {displayItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-3">
-                  <div className="w-20 h-20 rounded-2xl bg-pink-5 flex items-center justify-center text-4xl shrink-0 overflow-hidden">
-                    {item.emoji}
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-20 h-20 rounded-2xl bg-pink-5 flex items-center justify-center text-4xl shrink-0 overflow-hidden">
+                      {item.emoji}
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-pink-6 text-base mb-0.5">
+                        {item.name}
+                      </p>
+                      <p className="text-sm text-gray-400 mb-1">x{item.qty}</p>
+                      <p className="font-extrabold text-pink-6 text-lg">
+                        Rp{(item.price * item.qty).toLocaleString("id-ID")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-extrabold text-pink-6 text-base mb-0.5">
-                      {item.name}
-                    </p>
-                    <p className="text-sm text-gray-400 mb-1">x{item.qty}</p>
-                    <p className="font-extrabold text-pink-6 text-lg">
-                      Rp{(item.price * item.qty).toLocaleString("id-ID")}
+                  <div className="text-right shrink-0">
+                    <p className="text-[11px] text-gray-400">Harga satuan</p>
+                    <p className="text-sm font-extrabold text-pink-6">
+                      Rp{item.price.toLocaleString("id-ID")}
                     </p>
                   </div>
                 </div>

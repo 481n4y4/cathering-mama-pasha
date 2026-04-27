@@ -37,6 +37,7 @@ export default function DetailPesanan() {
       tanggal: "-",
       pesanan: "-",
       metode: "-",
+      buktiTransfer: "",
       total: "-",
       catatan: "-",
       status: "Sedang diproses",
@@ -92,7 +93,9 @@ export default function DetailPesanan() {
                   <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                     Order ID
                   </p>
-                  <p className="text-xl font-extrabold text-black">{order.id}</p>
+                  <p className="text-xl font-extrabold text-black">
+                    {order.id}
+                  </p>
                   <p className="text-sm text-gray-500 mt-1">{order.tanggal}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -142,7 +145,9 @@ export default function DetailPesanan() {
                           </td>
                         </tr>
                         <tr className="border-b border-pink-1">
-                          <td className="py-3 px-4 text-gray-500">No. Telepon</td>
+                          <td className="py-3 px-4 text-gray-500">
+                            No. Telepon
+                          </td>
                           <td className="py-3 px-4 text-right font-bold text-black">
                             {formatPhone(order.noTelepon)}
                           </td>
@@ -188,13 +193,36 @@ export default function DetailPesanan() {
                       </tbody>
                     </table>
                   </div>
+                  {order.metode === "Transfer" && (
+                    <div className="mt-4">
+                      <p className="text-sm font-bold text-black mb-2">
+                        Bukti Transfer
+                      </p>
+                      {order.buktiTransfer ? (
+                        <a
+                          href={order.buktiTransfer}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block"
+                        >
+                          <img
+                            src={order.buktiTransfer}
+                            alt="Bukti transfer"
+                            className="w-40 h-40 object-cover rounded-xl border border-pink-2 bg-white"
+                          />
+                        </a>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-pink-1 p-3 text-sm text-gray-400">
+                          User belum upload bukti transfer.
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="bg-[#f9f1f2] rounded-2xl p-5 sm:p-6">
-                <h2 className="text-lg font-bold text-black mb-4">
-                  Catatan
-                </h2>
+                <h2 className="text-lg font-bold text-black mb-4">Catatan</h2>
                 <div className="w-full bg-white rounded-xl border border-pink-1 p-4 text-sm text-black whitespace-pre-line">
                   {order.catatan || "-"}
                 </div>
