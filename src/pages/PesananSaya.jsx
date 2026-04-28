@@ -286,7 +286,7 @@ function RiwayatPesanan({ orders, onDetail }) {
                     Pesan Lagi
                   </button>
                   <button
-                    onClick={() => navigate(`/produk/${p.productId}#rating`)}
+                    onClick={() => navigate(`/produk/${p.productId}`)}
                     className={`text-[11px] font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all flex items-center gap-1 ${
                       p.rated
                         ? "border border-yellow-400 text-yellow-600 bg-yellow-50"

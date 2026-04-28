@@ -180,11 +180,25 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
       if (metodePembayaran === "Qris") {
         const paymentResponse = await paymentMidtrans({ orderId });
         const redirectUrl = paymentResponse?.data?.payment?.redirect_url;
+        const qrUrl = paymentResponse?.data?.payment?.qr_url;
+        const deeplinkUrl = paymentResponse?.data?.payment?.deeplink_url;
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
           return;
         }
-        throw new Error("Link pembayaran QRIS tidak tersedia.");
+
+        if (qrUrl) {
+          window.location.href = qrUrl;
+          return;
+        }
+
+        if (deeplinkUrl) {
+          window.location.href = deeplinkUrl;
+          return;
+        }
+
+        throw new Error("Link/QR pembayaran QRIS tidak tersedia.");
       }
 
       if (metodePembayaran === "Transfer") {
@@ -232,7 +246,9 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
               {userInfo?.nama_user || userInfo?.name || "Pengguna"}
             </span>
             <span className="text-gray-400 text-sm">
-              {userInfo?.no_telepon || userInfo?.phone || "No. telepon belum diisi"}
+              {userInfo?.no_telepon ||
+                userInfo?.phone ||
+                "No. telepon belum diisi"}
             </span>
           </div>
           <p className="text-sm text-gray-500 leading-relaxed">
