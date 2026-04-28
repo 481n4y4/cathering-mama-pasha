@@ -25,6 +25,7 @@ const formatTanggal = (value) => {
 const normalizeStatus = (status) => {
   if (!status) return "Diproses";
   if (status === "Pending") return "Diproses";
+  if (status === "Menunggu Pembayaran") return "Menunggu Pembayaran";
   if (status === "Dalam Pengiriman" || status === "Sedang diantar") {
     return "Diproses";
   }
@@ -32,7 +33,7 @@ const normalizeStatus = (status) => {
   return status;
 };
 
-function PesananAktif({ orders }) {
+function PesananAktif() {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6">
       <div className="text-8xl mb-4 opacity-60">🛍️</div>
@@ -46,6 +47,7 @@ function PesananAktif({ orders }) {
 }
 
 const statusToneMap = {
+  "Menunggu Pembayaran": "bg-[#fbbf24] text-[#78350f]",
   Diproses: "bg-[#fde28a] text-[#85712e]",
   Selesai: "bg-[#6cc765] text-white",
 };
@@ -351,9 +353,7 @@ export default function PesananSaya({ onNavigate }) {
       setOrders(response?.data || []);
     } catch (err) {
       const message =
-        typeof err === "string"
-          ? err
-          : err?.message || "Gagal memuat pesanan.";
+        typeof err === "string" ? err : err?.message || "Gagal memuat pesanan.";
       setError(message);
     } finally {
       if (showLoading) {
@@ -418,8 +418,7 @@ export default function PesananSaya({ onNavigate }) {
             profileUser?.nama_user ||
             profileUser?.nama ||
             "-",
-          noTelepon:
-            order.user?.no_telepon || profileUser?.no_telepon || "",
+          noTelepon: order.user?.no_telepon || profileUser?.no_telepon || "",
           alamat: order.user?.alamat || profileUser?.alamat || "-",
           emoji: product.emoji || "🍱",
           status: normalizedStatus,
@@ -498,7 +497,7 @@ export default function PesananSaya({ onNavigate }) {
         </div>
       ) : activeTab === "aktif" ? (
         activeOrders.length === 0 ? (
-          <PesananAktif orders={activeOrders} />
+          <PesananAktif />
         ) : (
           <RiwayatPesanan orders={activeOrders} onDetail={setSelectedOrder} />
         )

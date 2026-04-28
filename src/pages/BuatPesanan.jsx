@@ -179,10 +179,10 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
 
       if (metodePembayaran === "Qris") {
         const paymentResponse = await paymentMidtrans({ orderId });
-        const redirectUrl = paymentResponse?.data?.payment?.redirect_url;
+        const qrCodeUrl = paymentResponse?.data?.payment?.qr_code_url;
 
-        if (redirectUrl) {
-          window.location.href = redirectUrl;
+        if (qrCodeUrl) {
+          window.location.href = qrCodeUrl;
           return;
         }
 
