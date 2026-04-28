@@ -109,6 +109,19 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
     navigate(`/produk/${productId}`);
   };
 
+  const handleViewMenu = () => {
+    setActiveTab("Catering");
+    // Scroll ke section rekomendasi
+    setTimeout(() => {
+      const recomSection = document.querySelector(
+        "[data-section='rekomendasi']",
+      );
+      if (recomSection) {
+        recomSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 0);
+  };
+
   // Transform API data to match component structure
   const transformProductData = (apiProduct) => {
     // Map kategori to match existing tabs
@@ -368,7 +381,10 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
           </span>
         </div>
         {/* ── Section: Rekomendasi ──────────────────────────────── */}
-        <div className="flex items-center justify-between mb-3.5">
+        <div
+          data-section="rekomendasi"
+          className="flex items-center justify-between mb-3.5"
+        >
           <span className="text-[15px] lg:text-lg font-extrabold text-text-dark">
             Rekomendasi Untukmu
           </span>
@@ -404,7 +420,10 @@ export default function Dashboard({ onAddToCart, onDetailProduk }) {
               Selamat Datang di Mama Pasha&apos;s Treats! Nikmati berbagai macam
               snack lokal dan layanan catering profesional untuk acara anda.
             </p>
-            <button className="bg-pink-6 text-white text-sm lg:text-base font-bold px-5 lg:px-7 py-2 lg:py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-button">
+            <button
+              onClick={handleViewMenu}
+              className="bg-pink-6 text-white text-sm lg:text-base font-bold px-5 lg:px-7 py-2 lg:py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-button"
+            >
               Lihat Menu →
             </button>
           </div>
