@@ -146,30 +146,6 @@ export default function ProfilSaya({ onNavigate }) {
       title="Profil Saya"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* ══ Top bar DESKTOP ══ */}
-      <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
-        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
-          <div className="flex justify-start">
-            <button
-              onClick={() => handleNavigate("beranda")}
-              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left text-text-dark"></i>
-              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                Kembali
-              </span>
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <span className="text-sm lg:text-base font-extrabold text-text-dark">
-              Profil Saya
-            </span>
-          </div>
-          <div className="flex justify-end" />
-        </div>
-      </div>
-
       {/* ══════════════════════════════════
           WRAPPER KONTEN
       ══════════════════════════════════ */}
@@ -256,15 +232,17 @@ export default function ProfilSaya({ onNavigate }) {
                 ))}
               </div>
 
-              <button
-                onClick={() => setShowEdit(true)}
-                className="mt-6 w-full py-3.5 rounded-full font-bold text-white text-sm shadow transition-all hover:opacity-90 active:scale-95"
-                style={{
-                  background: "linear-gradient(90deg, #B8445E, #E47990)",
-                }}
-              >
-                ✏️ Edit Profil
-              </button>
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setShowEdit(true)}
+                  className="px-8 py-3.5 rounded-full font-bold text-white text-sm shadow transition-all hover:opacity-90 active:scale-95"
+                  style={{
+                    background: "linear-gradient(90deg, #B8445E, #E47990)",
+                  }}
+                >
+                  ✏️ Edit Profil
+                </button>
+              </div>
             </div>
 
             {/* ════════ DESKTOP ════════ */}
@@ -299,15 +277,17 @@ export default function ProfilSaya({ onNavigate }) {
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => setShowEdit(true)}
-                    className="mt-10 px-8 py-3 rounded-full font-bold text-white text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
-                    style={{
-                      background: "linear-gradient(90deg, #B8445E, #E47990)",
-                    }}
-                  >
-                    ✏️ Edit Profil
-                  </button>
+                  <div className="mt-10 flex justify-center">
+                    <button
+                      onClick={() => setShowEdit(true)}
+                      className="px-8 py-3 rounded-full font-bold text-white text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
+                      style={{
+                        background: "linear-gradient(90deg, #B8445E, #E47990)",
+                      }}
+                    >
+                      ✏️ Edit Profil
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

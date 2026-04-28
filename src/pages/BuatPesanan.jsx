@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ProfilLayout from "../components/ProfilLayout";
 import {
   checkCheckoutDate,
   createOrder,
@@ -108,10 +109,13 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     const fetchUserInfo = async () => {
       try {
         const cachedUser = localStorage.getItem("user");
-        if (!cachedUser) return;
+        if (cachedUser) {
+          const parsedUser = JSON.parse(cachedUser);
+          setUserInfo(parsedUser);
+          return;
+        }
 
-        const parsedUser = JSON.parse(cachedUser);
-        const userId = parsedUser?._id || parsedUser?.id;
+        const userId = localStorage.getItem("userId");
         if (!userId) return;
 
         const response = await getUserById(userId);
@@ -210,54 +214,30 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
   };
 
   return (
-    <div className="min-h-screen bg-pink-3 flex flex-col">
-      {/* ══ Top Bar ══ */}
-      <div className="sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
-        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
-          <div className="flex justify-start">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left text-text-dark"></i>
-              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                Kembali
-              </span>
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <span className="text-sm lg:text-base font-extrabold text-text-dark">
-              Buat Pesanan
-            </span>
-          </div>
-          <div className="flex justify-end" />
-        </div>
-      </div>
-
+    <ProfilLayout
+      title="Buat Pesanan"
+      onBack={handleBack}
+      showMenus={false}
+      showBottomBar={false}
+    >
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto px-3 lg:px-8 pt-5 pb-36 flex flex-col gap-4">
         {/* Kartu alamat */}
-        <div className="bg-white rounded-4xl p-5 shadow-card relative flex items-center gap-3">
-          <div className="flex-1 min-w-0 pr-2">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-pink-6 text-base">
-                <i className="fa-solid fa-location-dot"></i>
-              </span>
-              <span className="font-extrabold text-pink-6 text-base">
-                {userInfo?.nama_user || "Pengguna"}
-              </span>
-              <span className="text-gray-400 text-sm">
-                {userInfo?.no_telepon || "No. telepon belum diisi"}
-              </span>
-            </div>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {userInfo?.alamat || "Alamat belum diisi"}
-            </p>
+        <div className="bg-white rounded-4xl p-5 shadow-card">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-pink-6 text-base">
+              <i className="fa-solid fa-location-dot"></i>
+            </span>
+            <span className="font-extrabold text-pink-6 text-base">
+              {userInfo?.nama_user || userInfo?.name || "Pengguna"}
+            </span>
+            <span className="text-gray-400 text-sm">
+              {userInfo?.no_telepon || userInfo?.phone || "No. telepon belum diisi"}
+            </span>
           </div>
-          <div className="shrink-0 text-gray-400">
-            <i className="fa-solid fa-angle-right"></i>
-          </div>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            {userInfo?.alamat || userInfo?.address || "Alamat belum diisi"}
+          </p>
         </div>
 
         {/* Kartu detail pesanan */}
@@ -454,6 +434,6 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
           </div>
         </div>
       )}
-    </div>
+    </ProfilLayout>
   );
 }

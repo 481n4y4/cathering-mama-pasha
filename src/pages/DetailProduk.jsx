@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom"; // Jika menggunakan React Router
 import {
   addToCart,
   getProductById,
@@ -7,6 +7,7 @@ import {
   createComment,
   deleteComment,
 } from "../services/api";
+import ProfilLayout from "../components/ProfilLayout";
 import logoMamaPasha from "../assets/images/logo-kecil.png";
 
 /* ── Bintang ─────────────────────────────────────────────── */
@@ -44,7 +45,9 @@ export default function DetailProduk({
   const [submittingComment, setSubmittingComment] = useState(false);
   const [isLoggedIn] = useState(!!localStorage.getItem("token"));
   const [currentUserId, setCurrentUserId] = useState(null);
+  const ratingSectionRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Ambil ID dari URL params (gunakan ini jika pakai React Router)
   const { id } = useParams();
@@ -121,6 +124,23 @@ export default function DetailProduk({
     }
     navigate("/");
   };
+
+  const cartButton = (
+    <button
+      onClick={() => navigate("/keranjang")}
+      className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+    >
+      <span className="text-sm lg:text-base">🛒</span>
+      <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+        Keranjang
+      </span>
+      {cartCount > 0 && (
+        <span className="bg-pink-6 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+          {cartCount}
+        </span>
+      )}
+    </button>
+  );
 
   const fetchComments = async (productId) => {
     if (!productId) return;
@@ -217,46 +237,53 @@ export default function DetailProduk({
     return () => clearTimeout(timeoutId);
   }, [showAddSuccess]);
 
+  useEffect(() => {
+    if (location.hash !== "#rating") return;
+    if (!produk?.id) return;
+
+    // Delay kecil agar layout sudah final sebelum scroll ke section ulasan/rating.
+    const timeoutId = setTimeout(() => {
+      ratingSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+
+    return () => clearTimeout(timeoutId);
+  }, [location.hash, produk?.id]);
+
   // Tampilkan loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-pink-5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🍳</div>
-          <p className="text-pink-6 font-semibold">Memuat produk...</p>
+      <ProfilLayout
+        title="Detail Produk"
+        onBack={handleBack}
+        rightSlot={cartButton}
+        showMenus={false}
+        showBottomBar={false}
+      >
+        <div className="min-h-[calc(100vh-5rem)] bg-pink-5 flex items-center justify-center px-4">
+          <div className="text-center">
+            <div className="text-4xl mb-4">🍳</div>
+            <p className="text-pink-6 font-semibold">Memuat produk...</p>
+          </div>
         </div>
-      </div>
+      </ProfilLayout>
     );
   }
 
   // Tampilkan error state
   if (error || !produk) {
     return (
-      <div className="min-h-screen bg-pink-5 flex flex-col">
-        <div className="sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
-          <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
-            <div className="flex justify-start">
-              <button
-                onClick={handleBack}
-                className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-                aria-label="Kembali"
-              >
-                <i className="fa-solid fa-arrow-left text-text-dark"></i>
-                <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                  Kembali
-                </span>
-              </button>
-            </div>
-            <div className="flex justify-center">
-              <span className="text-sm lg:text-base font-extrabold text-text-dark">
-                Detail Produk
-              </span>
-            </div>
-            <div className="flex justify-end" />
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center p-6">
+      <ProfilLayout
+        title="Detail Produk"
+        onBack={handleBack}
+        rightSlot={cartButton}
+        showMenus={false}
+        showBottomBar={false}
+      >
+        <div className="min-h-[calc(100vh-5rem)] bg-pink-5 flex items-center justify-center px-4">
+          <div className="text-center p-6 max-w-sm">
             <div className="text-6xl mb-4">😞</div>
             <p className="text-gray-600 mb-4">
               {error || "Produk tidak ditemukan"}
@@ -269,51 +296,20 @@ export default function DetailProduk({
             </button>
           </div>
         </div>
-      </div>
+      </ProfilLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-pink-5 flex flex-col">
-      {/* ── Top Bar ────────────────────────────────────────── */}
-      <div className="absolute top-0 left-0 right-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
-        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
-          <div className="flex justify-start">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left text-text-dark"></i>
-              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                Kembali
-              </span>
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <span className="text-sm lg:text-base font-extrabold text-text-dark">
-              Detail Produk
-            </span>
-          </div>
-          <div className="flex justify-end">
-            <button
-              onClick={() => navigate("/keranjang")}
-              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-            >
-              <span className="text-sm lg:text-base">🛒</span>
-              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                Keranjang
-              </span>
-              {cartCount > 0 && (
-                <span className="bg-pink-6 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <ProfilLayout
+      title="Detail Produk"
+      onBack={handleBack}
+      rightSlot={cartButton}
+      showMenus={false}
+      showBottomBar={false}
+      useDefaultBackground={false}
+      contentClassName="bg-white"
+    >
       {/* ── Konten scroll ──────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-28">
         {/* Foto produk */}
@@ -395,7 +391,11 @@ export default function DetailProduk({
         </div>
 
         {/* ── Ulasan ─────────────────────────────────────────── */}
-        <div className="mx-4 mt-4 bg-pink-1/40 rounded-2xl overflow-hidden">
+        <div
+          id="rating"
+          ref={ratingSectionRef}
+          className="mx-4 mt-4 bg-pink-1/40 rounded-2xl overflow-hidden"
+        >
           {/* Header ulasan */}
           <div className="px-4 py-3 border-b-2 border-pink-6/30">
             <h2 className="text-base font-extrabold text-pink-6">
@@ -563,6 +563,6 @@ export default function DetailProduk({
           </div>
         </div>
       )}
-    </div>
+    </ProfilLayout>
   );
 }

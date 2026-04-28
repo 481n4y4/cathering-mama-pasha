@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import { getUserOrders } from "../services/api";
 
-const formatRp = (n) => "Rp " + n.toLocaleString("id-ID");
+const formatRp = (n) => "Rp " + Number(n || 0).toLocaleString("id-ID");
+
+const formatPhone = (phone) => {
+  if (!phone) return "-";
+  const phoneStr = phone.toString();
+  return phoneStr.startsWith("0") ? phoneStr : `0${phoneStr}`;
+};
 
 const formatTanggal = (value) => {
   if (!value) return "";
@@ -39,7 +45,175 @@ function PesananAktif({ orders }) {
   );
 }
 
-function RiwayatPesanan({ orders }) {
+const statusToneMap = {
+  Diproses: "bg-[#fde28a] text-[#85712e]",
+  Selesai: "bg-[#6cc765] text-white",
+};
+
+function OrderDetailModal({ order, onClose }) {
+  if (!order) return null;
+
+  const statusTone =
+    statusToneMap[order.status] || "bg-[#fdeff2] text-[#de6a84]";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4"
+      style={{
+        background: "rgba(184,68,94,0.35)",
+        backdropFilter: "blur(6px)",
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-3xl max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto rounded-4xl bg-[#fff9fa] shadow-2xl border border-white/70">
+        <div className="relative overflow-hidden bg-linear-to-r from-[#b8445e] to-[#e47990] px-5 sm:px-6 py-5 text-white">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
+            aria-label="Tutup detail pesanan"
+          >
+            ✕
+          </button>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.3em] text-white/85">
+            Detail Pesanan Aktif
+          </p>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-extrabold leading-tight">
+                {order.nama}
+              </h2>
+              <p className="mt-1 text-sm text-white/85">Order ID: {order.id}</p>
+              <p className="mt-1 text-sm text-white/85">{order.tanggal}</p>
+            </div>
+            <span
+              className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-extrabold ${statusTone}`}
+            >
+              {order.status}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-3xl border border-[#f6dbe0] bg-white p-4 sm:p-5 shadow-sm">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#b8445e] mb-4">
+                Informasi Pemesan
+              </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">Nama</span>
+                  <span className="font-bold text-[#4a2b33] text-right">
+                    {order.namaPemesan || order.nama || "-"}
+                  </span>
+                </div>
+                <div className="h-px bg-[#f5e2e6]" />
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">No. Telepon</span>
+                  <span className="font-bold text-[#4a2b33] text-right">
+                    {formatPhone(order.noTelepon)}
+                  </span>
+                </div>
+                <div className="h-px bg-[#f5e2e6]" />
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">Alamat</span>
+                  <span className="max-w-[60%] text-right font-bold text-[#4a2b33] whitespace-pre-line">
+                    {order.alamat || "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[#f6dbe0] bg-white p-4 sm:p-5 shadow-sm">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#b8445e] mb-4">
+                Rincian Pesanan
+              </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">Metode Pembayaran</span>
+                  <span className="font-bold text-[#4a2b33] text-right">
+                    {order.pembayaran}
+                  </span>
+                </div>
+                <div className="h-px bg-[#f5e2e6]" />
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">Jumlah Item</span>
+                  <span className="font-bold text-[#4a2b33] text-right">
+                    {order.jumlah} item
+                  </span>
+                </div>
+                <div className="h-px bg-[#f5e2e6]" />
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[#9c6b76]">Total</span>
+                  <span className="font-extrabold text-[#b8445e] text-right text-base">
+                    {formatRp(order.total)}
+                  </span>
+                </div>
+                <div className="h-px bg-[#f5e2e6]" />
+                <div>
+                  <p className="text-[#9c6b76] mb-2">Catatan</p>
+                  <div className="rounded-2xl bg-[#fff7f8] border border-[#f5e2e6] p-3 text-[#4a2b33] whitespace-pre-line leading-relaxed">
+                    {order.catatan || "Tidak ada catatan."}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-[#f6dbe0] bg-white p-4 sm:p-5 shadow-sm">
+            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#b8445e] mb-4">
+              Item Pesanan
+            </p>
+            {order.items?.length ? (
+              <div className="space-y-3">
+                {order.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 rounded-2xl border border-[#f5e2e6] bg-[#fff7f8] p-3"
+                  >
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-2xl shadow-sm">
+                      {item.emoji}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-[#4a2b33] leading-tight">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-[#9c6b76] mt-1">
+                        {item.qty} x {formatRp(item.price)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[11px] text-[#9c6b76]">Subtotal</p>
+                      <p className="font-extrabold text-[#b8445e]">
+                        {formatRp(item.subtotal)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-[#fff7f8] border border-[#f5e2e6] p-4 text-sm text-[#9c6b76]">
+                Detail item belum tersedia.
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-1 pb-1">
+            <button
+              onClick={onClose}
+              className="rounded-full border border-[#f0ccd3] bg-white px-5 py-3 text-sm font-bold text-[#b8445e] hover:bg-[#fff2f5] transition-colors"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RiwayatPesanan({ orders, onDetail }) {
   const navigate = useNavigate();
   const filtered = orders;
 
@@ -99,7 +273,10 @@ function RiwayatPesanan({ orders }) {
                 </div>
                 {/* Tombol aksi */}
                 <div className="flex gap-1.5 flex-wrap">
-                  <button className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
+                  <button
+                    onClick={() => onDetail?.(p)}
+                    className="text-[11px] font-bold border border-pink-2 text-text-dark px-3 py-1.5 rounded-full hover:bg-pink-5 active:scale-95 transition-all"
+                  >
                     Lihat Detail
                   </button>
                   <button
@@ -109,6 +286,7 @@ function RiwayatPesanan({ orders }) {
                     Pesan Lagi
                   </button>
                   <button
+                    onClick={() => navigate(`/produk/${p.productId}#rating`)}
                     className={`text-[11px] font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all flex items-center gap-1 ${
                       p.rated
                         ? "border border-yellow-400 text-yellow-600 bg-yellow-50"
@@ -133,6 +311,35 @@ export default function PesananSaya({ onNavigate }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [profileUser, setProfileUser] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  useEffect(() => {
+    const syncProfile = () => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) {
+        setProfileUser(null);
+        return;
+      }
+
+      try {
+        setProfileUser(JSON.parse(rawUser));
+      } catch {
+        setProfileUser(null);
+      }
+    };
+
+    syncProfile();
+    window.addEventListener("auth-changed", syncProfile);
+    window.addEventListener("storage", syncProfile);
+    window.addEventListener("focus", syncProfile);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncProfile);
+      window.removeEventListener("storage", syncProfile);
+      window.removeEventListener("focus", syncProfile);
+    };
+  }, []);
 
   const fetchOrders = useCallback(async (showLoading = true) => {
     if (showLoading) {
@@ -184,23 +391,49 @@ export default function PesananSaya({ onNavigate }) {
       orders.map((order) => {
         const firstItem = order.items?.[0];
         const product = firstItem?.produk || {};
-        const qty = order.jumlah_produk || 0;
+        const detailItems = (order.items || []).map((item, index) => {
+          const itemProduct = item?.produk || {};
+          const qtyItem = item?.kuantitas || 0;
+          const price = itemProduct?.harga || 0;
+          return {
+            id: item?._id || itemProduct?._id || `${order._id}-${index}`,
+            name: itemProduct?.nama_produk || "Produk",
+            emoji: itemProduct?.emoji || "🍱",
+            qty: qtyItem,
+            price,
+            subtotal: price * qtyItem,
+          };
+        });
+        const qty =
+          order.jumlah_produk ||
+          detailItems.reduce((sum, item) => sum + item.qty, 0) ||
+          0;
         const normalizedStatus = normalizeStatus(order.status);
         return {
           id: order._id,
           nama: product.nama_produk || "Pesanan",
+          namaPemesan:
+            order.user?.nama_user ||
+            order.user?.nama ||
+            profileUser?.nama_user ||
+            profileUser?.nama ||
+            "-",
+          noTelepon:
+            order.user?.no_telepon || profileUser?.no_telepon || "",
+          alamat: order.user?.alamat || profileUser?.alamat || "-",
           emoji: product.emoji || "🍱",
           status: normalizedStatus,
           tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
-          pembayaran: order.metode_pembayaran,
-          total: order.total_harga || 0,
-          alamat: "",
+          pembayaran: order.metode_pembayaran || "-",
+          total: Number(order.total_harga || 0),
+          catatan: order.pesan || order.catatan || "Tidak ada catatan.",
           jumlah: qty,
           productId: product._id,
+          items: detailItems,
           rated: false,
         };
       }),
-    [orders],
+    [orders, profileUser],
   );
 
   const activeOrders = useMemo(
@@ -232,30 +465,6 @@ export default function PesananSaya({ onNavigate }) {
       title="Pesanan Saya"
       onBack={() => handleNavigate("beranda")}
     >
-      {/* ══ Top bar DESKTOP ══ */}
-      <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
-        <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
-          <div className="flex justify-start">
-            <button
-              onClick={() => handleNavigate("beranda")}
-              className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left text-text-dark"></i>
-              <span className="text-[11px] lg:text-sm font-bold text-text-dark">
-                Kembali
-              </span>
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <span className="text-sm lg:text-base font-extrabold text-text-dark">
-              Pesanan Saya
-            </span>
-          </div>
-          <div className="flex justify-end" />
-        </div>
-      </div>
-
       {/* Tab */}
       <div className="flex shadow-md shadow-pink-800/20 bg-white/20">
         {[
@@ -291,12 +500,19 @@ export default function PesananSaya({ onNavigate }) {
         activeOrders.length === 0 ? (
           <PesananAktif orders={activeOrders} />
         ) : (
-          <RiwayatPesanan orders={activeOrders} />
+          <RiwayatPesanan orders={activeOrders} onDetail={setSelectedOrder} />
         )
       ) : historyOrders.length === 0 ? (
         <RiwayatPesanan orders={historyOrders} />
       ) : (
-        <RiwayatPesanan orders={historyOrders} />
+        <RiwayatPesanan orders={historyOrders} onDetail={setSelectedOrder} />
+      )}
+
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
       )}
     </ProfilLayout>
   );

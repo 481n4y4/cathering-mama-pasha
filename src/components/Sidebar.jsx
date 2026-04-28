@@ -7,6 +7,9 @@ export default function Sidebar({
   children,
   title,
   onBack,
+  rightSlot,
+  showMenus = true,
+  showBottomBar = true,
 }) {
   // Ambil data user dari localStorage untuk foto & nama
   const [userData, setUserData] = useState(null);
@@ -57,6 +60,8 @@ const menus = [
     onNavigate("beranda");
   };
 
+  const handleBack = onBack || (onNavigate ? () => onNavigate("beranda") : null);
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* ══════════════════════════════════════════════════════
@@ -66,16 +71,17 @@ const menus = [
           - TIDAK ada margin — nempel ke tepi kiri
           - Lebar 260px
       ══════════════════════════════════════════════════════ */}
-      <aside
-        className="hidden lg:flex flex-col items-center pt-10 pb-8 px-6 min-h-screen sticky top-0 shrink-0"
-        style={{
-          width: 260,
-          background: "#F0B3C5",
-          borderLeft: "2px solid rgba(255,255,255,0.90)",
-          borderRight: "2px solid rgba(255,255,255,0.90)",
-          borderRadius: 0,
-        }}
-      >
+      {showMenus && (
+        <aside
+          className="hidden lg:flex flex-col items-center pt-10 pb-8 px-6 min-h-screen sticky top-0 shrink-0"
+          style={{
+            width: 260,
+            background: "#F0B3C5",
+            borderLeft: "2px solid rgba(255,255,255,0.90)",
+            borderRight: "2px solid rgba(255,255,255,0.90)",
+            borderRadius: 0,
+          }}
+        >
         {/* ── Foto profil bulat 120px ── */}
         <div
           className="mb-3 shrink-0"
@@ -144,7 +150,8 @@ const menus = [
         >
           Logout
         </button>
-      </aside>
+        </aside>
+      )}
 
       {/* ══════════════════════════════════════════
           KONTEN UTAMA
@@ -156,46 +163,79 @@ const menus = [
             "linear-gradient(160deg, #FCC7D1 0%, #F0B3C5 50%, #E47990 100%)",
         }}
       >
+        {/* ── Top bar DESKTOP ── */}
+        <div className="hidden lg:block sticky top-0 z-40 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
+          <div className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
+            <div className="flex justify-start">
+              {handleBack && (
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
+                  aria-label="Kembali"
+                >
+                  <i className="fa-solid fa-arrow-left text-text-dark"></i>
+                  <span className="text-[11px] lg:text-sm font-bold text-text-dark">
+                    Kembali
+                  </span>
+                </button>
+              )}
+            </div>
+            <div className="flex justify-center">
+              <span className="text-sm lg:text-base font-extrabold text-text-dark">
+                {title}
+              </span>
+            </div>
+            <div className="flex justify-end">{rightSlot}</div>
+          </div>
+        </div>
+
         {/* ── Top bar MOBILE ── */}
-        <div className="lg:hidden flex items-center justify-between px-4 py-4 border-b border-pink-2/30">
+        <div className="lg:hidden flex items-center justify-between px-4 py-4 border-b border-pink-2/30 shadow-[0_4px_14px_rgba(184,68,94,0.08)] relative z-10">
           <div className="flex items-center gap-2">
-            <button
-              onClick={onBack || (() => onNavigate("beranda"))}
-              className="text-[#B8445E] font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity"
-              aria-label="Kembali"
-            >
-              <i className="fa-solid fa-arrow-left"></i>
-            </button>
+            {handleBack && (
+              <button
+                onClick={handleBack}
+                className="text-[#B8445E] font-bold text-xl flex items-center justify-center w-10 h-10 rounded-full transition-opacity"
+                aria-label="Kembali"
+              >
+                <i className="fa-solid fa-arrow-left"></i>
+              </button>
+            )}
             <h1 className="text-base font-extrabold text-[#B8445E]">{title}</h1>
           </div>
+          {rightSlot && <div className="flex items-center">{rightSlot}</div>}
         </div>
 
         {/* Konten halaman */}
         <div className="flex-1">{children}</div>
-          {/* ── Bottom Tab Bar MOBILE ── */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-pink-200 flex z-50">
-            {menus.map(({ key, icon, label }) => (
+        {showMenus && showBottomBar && (
+          <>
+            {/* ── Bottom Tab Bar MOBILE ── */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-pink-200 flex z-50">
+              {menus.map(({ key, icon, label }) => (
+                <button
+                  key={key}
+                  onClick={() => onNavigate(key)}
+                  className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors"
+                  style={{ color: activeMenu === key ? "#B8445E" : "#aaa" }}
+                >
+                  <i className={`${icon} text-lg`}></i>
+                  <span className="text-[9px] font-bold">{label}</span>
+                </button>
+              ))}
               <button
-                key={key}
-                onClick={() => onNavigate(key)}
-                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors"
-                style={{ color: activeMenu === key ? "#B8445E" : "#aaa" }}
+                onClick={handleLogout}
+                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5"
+                style={{ color: "#E53935" }}
               >
-                <i className={`${icon} text-lg`}></i>
-                <span className="text-[9px] font-bold">{label}</span>
+                <i className="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+                <span className="text-[9px] font-bold">Logout</span>
               </button>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5"
-              style={{ color: "#E53935" }}
-            >
-              <i className="fa-solid fa-arrow-right-from-bracket text-lg"></i>
-              <span className="text-[9px] font-bold">Logout</span>
-            </button>
-          </div>
-        {/* Padding bawah mobile */}
-        <div className="lg:hidden h-20" />
+            </div>
+            {/* Padding bawah mobile */}
+            <div className="lg:hidden h-20" />
+          </>
+        )}
       </div>
     </div>
   );

@@ -65,15 +65,22 @@ const LoginForm = () => {
           if (storedUser) {
             try {
               const parsed = JSON.parse(storedUser);
-              mergedUser = {
-                ...user,
-                foto_profile: parsed?.foto_profile ?? user?.foto_profile,
-                photo: parsed?.photo ?? user?.photo,
-                nama_user: parsed?.nama_user ?? user?.nama_user,
-                nama: parsed?.nama ?? user?.nama,
-                no_telepon: parsed?.no_telepon ?? user?.no_telepon,
-                alamat: parsed?.alamat ?? user?.alamat,
-              };
+              const sameUser =
+                String(parsed?.id ?? parsed?._id ?? "") ===
+                  String(user?.id ?? user?._id ?? "") &&
+                String(parsed?.role ?? "") === String(user?.role ?? "");
+
+              if (sameUser) {
+                mergedUser = {
+                  ...user,
+                  foto_profile: parsed?.foto_profile ?? user?.foto_profile,
+                  photo: parsed?.photo ?? user?.photo,
+                  nama_user: parsed?.nama_user ?? user?.nama_user,
+                  nama: parsed?.nama ?? user?.nama,
+                  no_telepon: parsed?.no_telepon ?? user?.no_telepon,
+                  alamat: parsed?.alamat ?? user?.alamat,
+                };
+              }
             } catch {
               mergedUser = user;
             }
