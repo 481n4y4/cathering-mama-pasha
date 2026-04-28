@@ -211,6 +211,25 @@ export const paymentMidtrans = async ({ orderId }) => {
   }
 };
 
+export const updatePaymentStatus = async ({ orderId, transaction_status }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      `/api/orders/payment/${orderId}/status`,
+      { transaction_status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const uploadBuktiTransfer = async ({ orderId, file }) => {
   try {
     const token = localStorage.getItem("token");

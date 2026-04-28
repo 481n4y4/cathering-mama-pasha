@@ -7,6 +7,7 @@ import {
   getCart,
   getUserById,
   paymentMidtrans,
+  updatePaymentStatus,
 } from "../services/api";
 
 /* ── Halaman Buat Pesanan ────────────────────────────────── */
@@ -155,6 +156,44 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     navigate("/keranjang");
   };
 
+  const handleQRISPayment = async (orderId, token) => {
+    return new Promise((resolve, reject) => {
+      if (!window.snap) {
+        reject(new Error("Midtrans Snap library tidak tersedia"));
+        return;
+      }
+
+      window.snap.pay(token, {
+        onSuccess: async (result) => {
+          try {
+            console.log("Payment success:", result);
+            // Update payment status di backend
+            await updatePaymentStatus({
+              orderId,
+              transaction_status: result.transaction_status,
+            });
+            resolve(result);
+          } catch (error) {
+            console.error("Error updating payment status:", error);
+            reject(error);
+          }
+        },
+        onPending: (result) => {
+          console.log("Payment pending:", result);
+          reject(new Error("Pembayaran masih pending. Silakan coba lagi."));
+        },
+        onError: (result) => {
+          console.log("Payment error:", result);
+          reject(new Error("Pembayaran gagal. Silakan coba lagi."));
+        },
+        onClose: () => {
+          console.log("Payment popup closed");
+          reject(new Error("Pembayaran dibatalkan."));
+        },
+      });
+    });
+  };
+
   const handleCheckout = async () => {
     setSubmitError("");
 
@@ -179,14 +218,23 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
 
       if (metodePembayaran === "Qris") {
         const paymentResponse = await paymentMidtrans({ orderId });
-        const qrCodeUrl = paymentResponse?.data?.payment?.qr_code_url;
+        const token = paymentResponse?.data?.payment?.token;
 
-        if (qrCodeUrl) {
-          window.location.href = qrCodeUrl;
-          return;
+        if (!token) {
+          throw new Error("Token pembayaran QRIS tidak tersedia.");
         }
 
-        throw new Error("Link pembayaran QRIS tidak tersedia.");
+        // Buka Snap popup
+        await handleQRISPayment(orderId, token);
+
+        // Jika berhasil, redirect ke halaman sukses
+        navigate("/pesanan-saya", {
+          state: {
+            orderId,
+            message: "Pembayaran berhasil! Pesanan Anda sedang diproses.",
+          },
+        });
+        return;
       }
 
       if (metodePembayaran === "Transfer") {
