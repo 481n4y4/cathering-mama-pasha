@@ -45,6 +45,13 @@ export default function Keranjang({ onNavigate }) {
             name: product.nama_produk || "Produk",
             price: product.harga || 0,
             qty: item.kuantitas || 0,
+            image:
+              product.gambar ||
+              product.image ||
+              product.image_url ||
+              product.foto ||
+              product.foto_produk ||
+              "",
             emoji: emojiByCategory[category] || "🍱",
           };
         });
@@ -176,8 +183,17 @@ export default function Keranjang({ onNavigate }) {
                       onChange={() => toggleItem(item.id)}
                       className="w-5 h-5 rounded border-pink-300 text-pink-6 accent-pink-6"
                     />
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-3xl bg-pink-5 flex items-center justify-center text-3xl">
-                      {item.emoji}
+                    <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-3xl bg-pink-5 flex items-center justify-center overflow-hidden">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-3xl">{item.emoji}</span>
+                      )}
                     </div>
                   </label>
 

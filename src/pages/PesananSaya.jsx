@@ -52,6 +52,11 @@ const statusToneMap = {
   Selesai: "bg-[#6cc765] text-white",
 };
 
+const listStatusToneMap = {
+  Diproses: "bg-yellow-200 text-yellow-800",
+  Selesai: "bg-green-500 text-white",
+};
+
 function OrderDetailModal({ order, onClose }) {
   if (!order) return null;
 
@@ -174,8 +179,17 @@ function OrderDetailModal({ order, onClose }) {
                     key={item.id}
                     className="flex items-center gap-3 rounded-2xl border border-[#f5e2e6] bg-[#fff7f8] p-3"
                   >
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-2xl shadow-sm">
-                      {item.emoji}
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-2xl shadow-sm overflow-hidden">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span>{item.emoji}</span>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-extrabold text-[#4a2b33] leading-tight">
@@ -237,15 +251,29 @@ function RiwayatPesanan({ orders, onDetail }) {
             <div key={i} className="bg-white rounded-2xl p-4 shadow-card">
               {/* Atas */}
               <div className="flex gap-3 mb-3">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-pink-5 flex items-center justify-center text-3xl shrink-0">
-                  {p.emoji}
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-pink-5 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                  {p.image ? (
+                    <img
+                      src={p.image}
+                      alt={p.nama}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span>{p.emoji}</span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-extrabold text-text-dark text-sm lg:text-base">
                       {p.nama}
                     </p>
-                    <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-green-500 text-white shrink-0">
+                    <span
+                      className={`text-[10px] font-extrabold px-3 py-1 rounded-full shrink-0 ${
+                        listStatusToneMap[p.status] ||
+                        "bg-pink-5 text-text-dark"
+                      }`}
+                    >
                       {p.status}
                     </span>
                   </div>
@@ -398,6 +426,13 @@ export default function PesananSaya({ onNavigate }) {
           return {
             id: item?._id || itemProduct?._id || `${order._id}-${index}`,
             name: itemProduct?.nama_produk || "Produk",
+            image:
+              itemProduct?.gambar ||
+              itemProduct?.image ||
+              itemProduct?.image_url ||
+              itemProduct?.foto ||
+              itemProduct?.foto_produk ||
+              "",
             emoji: itemProduct?.emoji || "🍱",
             qty: qtyItem,
             price,
@@ -409,6 +444,13 @@ export default function PesananSaya({ onNavigate }) {
           detailItems.reduce((sum, item) => sum + item.qty, 0) ||
           0;
         const normalizedStatus = normalizeStatus(order.status);
+        const imageFallbackProduct =
+          product?.gambar ||
+          product?.image ||
+          product?.image_url ||
+          product?.foto ||
+          product?.foto_produk ||
+          "";
         return {
           id: order._id,
           nama: product.nama_produk || "Pesanan",
@@ -420,6 +462,7 @@ export default function PesananSaya({ onNavigate }) {
             "-",
           noTelepon: order.user?.no_telepon || profileUser?.no_telepon || "",
           alamat: order.user?.alamat || profileUser?.alamat || "-",
+          image: imageFallbackProduct,
           emoji: product.emoji || "🍱",
           status: normalizedStatus,
           tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),

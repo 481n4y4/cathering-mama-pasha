@@ -88,6 +88,13 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
             name: product.nama_produk || "Produk",
             price: product.harga || 0,
             qty: item.kuantitas || 0,
+            image:
+              product.gambar ||
+              product.image ||
+              product.image_url ||
+              product.foto ||
+              product.foto_produk ||
+              "",
             emoji: product.emoji || "🍱",
           };
         });
@@ -307,7 +314,16 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-20 h-20 rounded-2xl bg-pink-5 flex items-center justify-center text-4xl shrink-0 overflow-hidden">
-                      {item.emoji}
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span>{item.emoji}</span>
+                      )}
                     </div>
                     <div>
                       <p className="font-extrabold text-pink-6 text-base mb-0.5">
