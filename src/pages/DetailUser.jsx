@@ -62,12 +62,12 @@ const DetailUser = () => {
   return (
     <SidebarAdmin title="Detail Pengguna">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <NavbarProfile page="admin/kelola-user" />
+        <NavbarProfile backTo="/" />
 
-        <div className="p-10 flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm p-8">
+        <div className="p-4 sm:p-6 lg:p-10 flex-1 overflow-auto">
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm p-5 sm:p-8">
             <div className="flex items-center gap-4 border-b pb-6 mb-8">
-              <h2 className="text-3xl font-bold text-gray-800">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
                 Detail Pengguna
               </h2>
             </div>
@@ -84,8 +84,8 @@ const DetailUser = () => {
               <div className="flex flex-col md:flex-row gap-10">
                 {/* Profile Avatar / Left Column */}
                 <div className="flex flex-col items-center shrink-0">
-                  <div className="w-40 h-40 bg-[#f0d8df] rounded-full flex items-center justify-center text-[#e96481] border-4 border-pink-200 mb-4 shadow-sm">
-                    <User className="w-20 h-20" />
+                  <div className="w-28 h-28 sm:w-40 sm:h-40 bg-[#f0d8df] rounded-full flex items-center justify-center text-[#e96481] border-4 border-pink-200 mb-4 shadow-sm">
+                    <User className="w-14 h-14 sm:w-20 sm:h-20" />
                   </div>
                   <span className="bg-[#e4839e] text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
                     Pelanggan

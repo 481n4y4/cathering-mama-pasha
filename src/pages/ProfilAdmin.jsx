@@ -4,9 +4,11 @@ import NavbarProfile from "../components/NavbarProfile";
 import EditProfileForm from "../components/EditProfileForm";
 
 const fieldRow = (label, value) => (
-  <div className="flex items-center justify-between py-2 border-b border-pink-100 last:border-b-0">
+  <div className="flex items-start justify-between gap-3 py-2 border-b border-pink-100 last:border-b-0">
     <span className="text-sm text-[#B8445E]/70 font-semibold">{label}</span>
-    <span className="text-sm font-bold text-[#B8445E]">{value}</span>
+    <span className="text-sm font-bold text-[#B8445E] text-right break-words max-w-[60%]">
+      {value}
+    </span>
   </div>
 );
 
@@ -93,12 +95,12 @@ export default function ProfilAdmin() {
 
   return (
     <SidebarAdmin title="Profil Admin">
-      <main className="flex-1">
-        <NavbarProfile page="/admin/statistik" />
+      <main>
+        <NavbarProfile backTo="/" />
 
-        <section className="py-5 px-10">
-          <div className="max-w-4xl mx-auto bg-white rounded-3xl p-6 shadow-md">
-            <h2 className="text-lg font-extrabold text-[#B8445E] mb-4">
+        <section className="py-5 px-4 sm:px-6 lg:px-10 pb-0">
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl p-5 sm:p-6 shadow-md">
+            <h2 className="text-base sm:text-lg font-extrabold text-[#B8445E] mb-4">
               Informasi Akun
             </h2>
             {fieldRow("Nama", nama)}

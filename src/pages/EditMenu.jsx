@@ -102,12 +102,14 @@ const EditMenu = () => {
   return (
     <SidebarAdmin title="Edit Menu">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <NavbarProfile page="admin/kelola-menu" />
+        <NavbarProfile backTo="/" />
 
-        <div className="p-10 flex-1 overflow-auto">
-          <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-8">
+        <div className="p-4 sm:p-6 lg:p-10 flex-1 overflow-auto">
+          <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-5 sm:p-8">
             <div className="flex items-center gap-4 border-b pb-6 mb-8">
-              <h2 className="text-3xl font-bold text-gray-800">Edit Menu</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Edit Menu
+              </h2>
             </div>
 
             {error && (
@@ -231,18 +233,18 @@ const EditMenu = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-4 mt-8 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-8 pt-6 border-t">
                   <button
                     type="button"
                     onClick={() => navigate("/admin/kelola-menu")}
-                    className="px-6 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    className="px-6 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors w-full sm:w-auto"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-3 rounded-xl font-bold text-white bg-[#e96481] hover:bg-[#d45672] transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md"
+                    className="px-6 py-3 rounded-xl font-bold text-white bg-[#e96481] hover:bg-[#d45672] transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md w-full sm:w-auto"
                   >
                     {loading ? (
                       "Menyimpan..."

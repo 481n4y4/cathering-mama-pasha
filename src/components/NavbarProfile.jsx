@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-export default function NavbarProfile({ page }) {
+export default function NavbarProfile({ backTo, page }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -9,16 +9,20 @@ export default function NavbarProfile({ page }) {
     navigate("/login");
   };
 
-  const navigation = (page) => {
-    navigate(`/${page}`);
+  const navigation = (target) => {
+    if (!target) return;
+    const normalized = target.startsWith("/") ? target : `/${target}`;
+    navigate(normalized);
   };
+
+  const backTarget = backTo || page || "/";
 
   return (
     <div className="hidden lg:block sticky top-0 z-50 px-3 pt-3 lg:px-8 lg:pt-4 pointer-events-none">
       <nav className="pointer-events-auto grid grid-cols-3 items-center h-13 lg:h-16 px-4 bg-white rounded-full border border-pink-2 shadow-nav">
         <div className="flex justify-start">
           <button
-            onClick={() => navigation(page)}
+            onClick={() => navigation(backTarget)}
             className="flex items-center gap-2 border border-pink-2 rounded-full px-3 py-1.5 bg-pink-5 hover:bg-pink-1 transition-colors"
             aria-label="Kembali"
           >

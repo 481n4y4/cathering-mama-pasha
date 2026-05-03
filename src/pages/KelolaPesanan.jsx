@@ -39,6 +39,8 @@ const KelolaPesanan = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   const handleDetail = (order) => {
     navigate(`/admin/kelola-pesanan/${order.id}`, { state: { order } });
@@ -70,13 +72,15 @@ const KelolaPesanan = () => {
       orders.map((order) => {
         const firstItem = order.items?.[0];
         const product = firstItem?.produk || {};
+        const dateValue = order.tanggal_pengiriman || order.createdAt || "";
         const normalizedStatus = normalizeStatus(order.status);
         return {
           id: order._id,
           nama: order.user?.nama_user || "User",
           noTelepon: order.user?.no_telepon || "",
           alamat: order.user?.alamat || "",
-          tanggal: formatTanggal(order.tanggal_pengiriman || order.createdAt),
+          tanggal: formatTanggal(dateValue),
+          dateValue,
           pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
           metode: order.metode_pembayaran,
           buktiTransfer: order.bukti_transfer || "",
@@ -91,16 +95,56 @@ const KelolaPesanan = () => {
   );
 
   const filteredOrders = useMemo(() => {
-    if (filterStatus === "Semua") return mappedOrders;
-    return mappedOrders.filter((order) => order.status === filterStatus);
+    const filtered =
+      filterStatus === "Semua"
+        ? mappedOrders
+        : mappedOrders.filter((order) => order.status === filterStatus);
+    return [...filtered].sort((a, b) => {
+      const aTime = a.dateValue ? new Date(a.dateValue).getTime() : 0;
+      const bTime = b.dateValue ? new Date(b.dateValue).getTime() : 0;
+      return bTime - aTime;
+    });
   }, [filterStatus, mappedOrders]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+  const pageStart =
+    filteredOrders.length === 0
+      ? 0
+      : (currentPage - 1) * pageSize + 1;
+  const pageEnd = Math.min(currentPage * pageSize, filteredOrders.length);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const pageItems = (() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const items = [1];
+    if (currentPage > 3) items.push("ellipsis-left");
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i += 1) {
+      items.push(i);
+    }
+    if (currentPage < totalPages - 2) items.push("ellipsis-right");
+    items.push(totalPages);
+    return items;
+  })();
 
   return (
     <SidebarAdmin title="Kelola Pesanan">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <div className="flex-1 overflow-auto">
           {/* Navbar */}
-          <NavbarProfile page="/" />
+          <NavbarProfile backTo="/" />
 
           {/* Table Area */}
           <div className="px-4 sm:px-6 lg:px-8 pb-6 pt-2 flex flex-col">
@@ -145,7 +189,7 @@ const KelolaPesanan = () => {
                     Belum ada pesanan.
                   </div>
                 ) : (
-                  filteredOrders.map((item) => (
+                  paginatedOrders.map((item) => (
                     <div
                       key={item.id}
                       className="rounded-2xl border border-pink-1 bg-[#fff7f8] p-4 shadow-sm"
@@ -251,13 +295,13 @@ const KelolaPesanan = () => {
                         </td>
                       </tr>
                     ) : (
-                      filteredOrders.map((item, index) => (
+                      paginatedOrders.map((item, index) => (
                         <tr
                           key={item.id}
                           className="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors"
                         >
                           <td className="py-4 px-6 font-bold text-black align-middle">
-                            {index + 1}
+                            {(currentPage - 1) * pageSize + index + 1}
                           </td>
                           <td className="py-4 px-6 font-bold text-black align-middle">
                             {item.nama}
@@ -305,23 +349,51 @@ const KelolaPesanan = () => {
               {/* Pagination */}
               <div className="p-4 sm:p-5 px-5 sm:px-6 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shrink-0">
                 <span className="text-gray-400 font-semibold text-sm text-center sm:text-left">
-                  Menampilkan 1 - 3 dari 120 pesanan
+                  Menampilkan {pageStart} - {pageEnd} dari {filteredOrders.length} pesanan
                 </span>
                 <div className="flex items-center justify-center sm:justify-end gap-2 text-gray-600 font-bold">
-                  <button className="w-8 h-8 flex items-center justify-center bg-[#de6a84] text-white rounded-lg shadow-sm">
-                    1
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                    disabled={currentPage === 1}
+                    aria-label="Sebelumnya"
+                  >
+                    &lt;
                   </button>
-                  <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
-                    2
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
-                    3
-                  </button>
-                  <span className="px-1 text-gray-400">...</span>
-                  <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
-                    40
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
+                  {pageItems.map((item, index) =>
+                    typeof item === "number" ? (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setCurrentPage(item)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                          currentPage === item
+                            ? "bg-[#de6a84] text-white shadow-sm"
+                            : "hover:bg-gray-100"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ) : (
+                      <span key={`${item}-${index}`} className="px-1 text-gray-400">
+                        ...
+                      </span>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(prev + 1, totalPages),
+                      )
+                    }
+                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                    disabled={currentPage === totalPages}
+                    aria-label="Berikutnya"
+                  >
                     &gt;
                   </button>
                 </div>

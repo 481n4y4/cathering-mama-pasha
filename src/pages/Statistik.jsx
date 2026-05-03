@@ -11,7 +11,7 @@ import {
 import SidebarAdmin from "../components/SidebarAdmin";
 import { MenuSquare, ShoppingCart, Wallet } from "lucide-react";
 import NavbarProfile from "../components/NavbarProfile";
-import { getAdminOrders } from "../services/api";
+import { getAdminOrders, getProducts } from "../services/api";
 
 const MONTH_LABELS = [
   "Jan",
@@ -38,6 +38,9 @@ const DashboardAdmin = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [totalMenuCount, setTotalMenuCount] = useState(0);
+  const [salesPage, setSalesPage] = useState(1);
+  const salesPageSize = 10;
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -58,6 +61,21 @@ const DashboardAdmin = () => {
     };
 
     fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const response = await getProducts();
+        if (response?.success && Array.isArray(response.data)) {
+          setTotalMenuCount(response.data.length);
+        }
+      } catch (err) {
+        console.error("Gagal memuat total menu:", err);
+      }
+    };
+
+    fetchMenus();
   }, []);
 
   const orders2026 = useMemo(() => {
@@ -103,7 +121,7 @@ const DashboardAdmin = () => {
       .sort((a, b) => b.date - a.date);
   }, [orders]);
 
-  const totalMenu = useMemo(() => 0, []);
+  const totalMenu = totalMenuCount;
   const totalOrders = useMemo(() => orders.length, [orders]);
   const totalRevenue = useMemo(() => {
     return orders.reduce(
@@ -112,25 +130,64 @@ const DashboardAdmin = () => {
     );
   }, [orders]);
 
+  const totalSalesPages = Math.max(
+    1,
+    Math.ceil(last30DaysSales.length / salesPageSize),
+  );
+  const paginatedSales = last30DaysSales.slice(
+    (salesPage - 1) * salesPageSize,
+    salesPage * salesPageSize,
+  );
+  const salesStart =
+    last30DaysSales.length === 0
+      ? 0
+      : (salesPage - 1) * salesPageSize + 1;
+  const salesEnd = Math.min(
+    salesPage * salesPageSize,
+    last30DaysSales.length,
+  );
+
+  useEffect(() => {
+    if (salesPage > totalSalesPages) {
+      setSalesPage(totalSalesPages);
+    }
+  }, [salesPage, totalSalesPages]);
+
+  const salesPageItems = (() => {
+    if (totalSalesPages <= 5) {
+      return Array.from({ length: totalSalesPages }, (_, i) => i + 1);
+    }
+    const items = [1];
+    if (salesPage > 3) items.push("ellipsis-left");
+    const start = Math.max(2, salesPage - 1);
+    const end = Math.min(totalSalesPages - 1, salesPage + 1);
+    for (let i = start; i <= end; i += 1) {
+      items.push(i);
+    }
+    if (salesPage < totalSalesPages - 2) items.push("ellipsis-right");
+    items.push(totalSalesPages);
+    return items;
+  })();
+
   return (
     <SidebarAdmin title="Statistik">
       <main className="flex-1">
-        <NavbarProfile page="/" />
+        <NavbarProfile backTo="/" />
 
-        <section className="py-5 px-10 overflow-auto">
-          <h1 className="text-3xl font-semibold mb-12 text-gray-900">
+        <section className="py-5 px-4 sm:px-6 lg:px-10 overflow-auto">
+          <h1 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-12 text-gray-900">
             Statistik
           </h1>
 
           {/* Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-10">
             {/* Card 1 */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-white rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                 Total Menu
               </h3>
               <div className="flex items-center justify-between">
-                <span className="text-5xl font-extrabold text-black">
+                <span className="text-4xl sm:text-5xl font-extrabold text-black">
                   {totalMenu}
                 </span>
                 <MenuSquare
@@ -141,12 +198,12 @@ const DashboardAdmin = () => {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-white rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                 Total Pesanan
               </h3>
               <div className="flex items-center justify-between">
-                <span className="text-5xl font-extrabold text-black">
+                <span className="text-4xl sm:text-5xl font-extrabold text-black">
                   {totalOrders}
                 </span>
                 <ShoppingCart
@@ -157,12 +214,12 @@ const DashboardAdmin = () => {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-white rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-md relative overflow-hidden transition-transform hover:scale-[1.02]">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                 Total Pendapatan
               </h3>
               <div className="flex items-center justify-between mt-auto">
-                <span className="text-3xl font-bold text-gray-900">
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">
                   Rp. {formatRupiah(totalRevenue)}
                 </span>
                 <Wallet
@@ -174,9 +231,9 @@ const DashboardAdmin = () => {
           </div>
 
           {/* Chart Section */}
-          <div className="border border-blue-400 bg-[#e8ccd5] bg-opacity-60 rounded-lg p-6 shadow-sm w-full h-[500px] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-semibold text-gray-900 ml-2">
+          <div className="border border-blue-400 bg-[#e8ccd5] bg-opacity-60 rounded-lg p-4 sm:p-6 shadow-sm w-full h-[360px] sm:h-[420px] lg:h-[500px] flex flex-col">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 ml-2">
                 Grafik Pendapatan 2026
               </h3>
               {loading && (
@@ -278,7 +335,7 @@ const DashboardAdmin = () => {
                       </td>
                     </tr>
                   ) : (
-                    last30DaysSales.map((row) => (
+                    paginatedSales.map((row) => (
                       <tr key={row.id} className="border-b border-gray-100">
                         <td className="py-3 pr-4 text-sm text-gray-700">
                           {row.date.toLocaleDateString("id-ID", {
@@ -295,6 +352,53 @@ const DashboardAdmin = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <span className="text-gray-400 font-semibold text-sm text-center sm:text-left">
+                Menampilkan {salesStart} - {salesEnd} dari {last30DaysSales.length} transaksi
+              </span>
+              <div className="flex items-center justify-center sm:justify-end gap-2 text-gray-600 font-bold">
+                <button
+                  type="button"
+                  onClick={() => setSalesPage((prev) => Math.max(prev - 1, 1))}
+                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                  disabled={salesPage === 1}
+                  aria-label="Sebelumnya"
+                >
+                  &lt;
+                </button>
+                {salesPageItems.map((item, index) =>
+                  typeof item === "number" ? (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setSalesPage(item)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                        salesPage === item
+                          ? "bg-[#de6a84] text-white shadow-sm"
+                          : "hover:bg-gray-100"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <span key={`${item}-${index}`} className="px-1 text-gray-400">
+                      ...
+                    </span>
+                  ),
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSalesPage((prev) => Math.min(prev + 1, totalSalesPages))
+                  }
+                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                  disabled={salesPage === totalSalesPages}
+                  aria-label="Berikutnya"
+                >
+                  &gt;
+                </button>
+              </div>
             </div>
           </div>
         </section>

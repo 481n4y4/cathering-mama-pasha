@@ -5,7 +5,6 @@ import { FileText, MessageCircle, X } from "lucide-react";
 import { closeNotification, getAdminNotifications } from "../services/api";
 
 const NotifAdmin = () => {
-  const [activeTab, setActiveTab] = useState("Semua");
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,10 +47,7 @@ const NotifAdmin = () => {
     });
   }, [notifications]);
 
-  const filteredData =
-    activeTab === "Belum dibaca"
-      ? notifData.filter((item) => !item.isRead)
-      : notifData;
+  const filteredData = notifData;
 
   const handleClose = async (id) => {
     try {
@@ -66,39 +62,12 @@ const NotifAdmin = () => {
     <SidebarAdmin title="Notifikasi">
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Navbar */}
-        <NavbarProfile page="/" />
+        <NavbarProfile backTo="/" />
 
-        {/* Header Title */}
-        <div className="px-10 mt-4 shrink-0 flex items-center">
-          <h1 className="text-3xl font-semibold text-black">Notifikasi</h1>
-        </div>
-
-        {/* Tabs */}
-        <div className="px-10 mt-8 mb-6 flex gap-4">
-          <button
-            onClick={() => setActiveTab("Semua")}
-            className={`px-8 py-2.5 rounded-3xl font-bold text-lg transition-colors ${
-              activeTab === "Semua"
-                ? "bg-[#dfa0af] text-[#71162f]"
-                : "text-black hover:bg-[#dfa0af]/50"
-            }`}
-          >
-            Semua
-          </button>
-          <button
-            onClick={() => setActiveTab("Belum dibaca")}
-            className={`px-8 py-2.5 rounded-3xl font-bold text-lg transition-colors ${
-              activeTab === "Belum dibaca"
-                ? "bg-[#dfa0af] text-[#71162f]"
-                : "text-gray-900 hover:bg-[#dfa0af]/50"
-            }`}
-          >
-            Belum dibaca
-          </button>
-        </div>
+        <div className="px-4 sm:px-6 lg:px-10 mt-4 sm:mt-6" />
 
         {/* Notifications List */}
-        <div className="px-10 pb-10 flex-1 overflow-auto flex flex-col gap-5">
+        <div className="px-4 sm:px-6 lg:px-10 pb-10 flex-1 overflow-auto flex flex-col gap-4 sm:gap-5">
           {isLoading && (
             <div className="text-gray-700 font-medium">
               Memuat notifikasi...
@@ -112,29 +81,29 @@ const NotifAdmin = () => {
           {filteredData.map((notif) => (
             <div
               key={notif.id}
-              className="bg-[#f4d8de] rounded-3xl p-6 sm:px-8 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center gap-6 shadow-sm border border-white/40 relative hover:bg-[#eed0d5] transition-colors"
+              className="bg-[#f4d8de] rounded-3xl p-5 sm:px-8 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-sm border border-white/40 relative hover:bg-[#eed0d5] transition-colors"
             >
               {/* Icon Wrap */}
               <div
-                className={`w-16 h-16 shrink-0 rounded-full flex items-center justify-center mt-3 sm:mt-0 ${notif.iconBg} shadow-sm border border-white/20`}
+                className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full flex items-center justify-center mt-1 sm:mt-0 ${notif.iconBg} shadow-sm border border-white/20`}
               >
-                <notif.Icon className="w-8 h-8 text-black" strokeWidth={2} />
+                <notif.Icon className="w-7 h-7 sm:w-8 sm:h-8 text-black" strokeWidth={2} />
               </div>
 
               {/* Content */}
-              <div className="flex-1 mt-2 sm:mt-0">
-                <h3 className="text-xl font-bold text-black mb-1.5">
+              <div className="flex-1 mt-1 sm:mt-0">
+                <h3 className="text-lg sm:text-xl font-bold text-black mb-1.5">
                   {notif.title}
                 </h3>
-                <p className="text-gray-800 font-medium text-[15px]">
+                <p className="text-gray-800 font-medium text-sm sm:text-[15px]">
                   {notif.desc}
                 </p>
               </div>
 
               {/* Time */}
-              <div className="absolute sm:relative top-6 right-6 sm:top-auto sm:right-auto self-start">
+              <div className="relative sm:absolute sm:top-6 sm:right-6 self-start">
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-700 font-medium text-sm">
+                  <span className="text-gray-700 font-medium text-xs sm:text-sm">
                     {notif.time}
                   </span>
                   <button
