@@ -60,9 +60,12 @@ const DetailUser = () => {
   };
 
   return (
-    <SidebarAdmin title="Detail Pengguna">
+    <SidebarAdmin
+      title="Detail Pengguna"
+      onBack={() => navigate("/admin/kelola-user")}
+    >
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <NavbarProfile backTo="/" />
+        <NavbarProfile backTo="/admin/kelola-user" />
 
         <div className="p-4 sm:p-6 lg:p-10 flex-1 overflow-auto">
           <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm p-5 sm:p-8">

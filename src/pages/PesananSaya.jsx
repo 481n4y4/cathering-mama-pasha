@@ -335,9 +335,78 @@ function RiwayatPesanan({ orders, onDetail }) {
   );
 }
 
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  const pageItems = (() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const items = [1];
+    if (currentPage > 3) items.push("ellipsis-left");
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i += 1) {
+      items.push(i);
+    }
+
+    if (currentPage < totalPages - 2) items.push("ellipsis-right");
+    items.push(totalPages);
+    return items;
+  })();
+
+  return (
+    <div className="px-4 lg:px-8 pb-6 pt-1">
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="min-w-10 rounded-full border border-pink-2 bg-white px-3 py-2 text-sm font-bold text-text-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:bg-pink-5"
+        >
+          Prev
+        </button>
+
+        {pageItems.map((item) =>
+          typeof item === "number" ? (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onPageChange(item)}
+              className={`min-w-10 rounded-full px-3 py-2 text-sm font-bold transition-colors ${
+                currentPage === item
+                  ? "bg-pink-6 text-white"
+                  : "border border-pink-2 bg-white text-text-dark hover:bg-pink-5"
+              }`}
+            >
+              {item}
+            </button>
+          ) : (
+            <span key={item} className="px-1 text-text-mid">
+              ...
+            </span>
+          ),
+        )}
+
+        <button
+          type="button"
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="min-w-10 rounded-full border border-pink-2 bg-white px-3 py-2 text-sm font-bold text-text-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:bg-pink-5"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PesananSaya({ onNavigate }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("aktif");
+  const [currentPage, setCurrentPage] = useState(1);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -488,6 +557,24 @@ export default function PesananSaya({ onNavigate }) {
     [mappedOrders],
   );
 
+  const visibleOrders = activeTab === "aktif" ? activeOrders : historyOrders;
+  const pageSize = 5;
+  const totalPages = Math.max(1, Math.ceil(visibleOrders.length / pageSize));
+  const paginatedOrders = visibleOrders.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const handleNavigate = (path) => {
     if (onNavigate) {
       onNavigate(path);
@@ -542,12 +629,29 @@ export default function PesananSaya({ onNavigate }) {
         activeOrders.length === 0 ? (
           <PesananAktif />
         ) : (
-          <RiwayatPesanan orders={activeOrders} onDetail={setSelectedOrder} />
+          <>
+            <RiwayatPesanan
+              orders={paginatedOrders}
+              onDetail={setSelectedOrder}
+            />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
         )
       ) : historyOrders.length === 0 ? (
         <RiwayatPesanan orders={historyOrders} />
       ) : (
-        <RiwayatPesanan orders={historyOrders} onDetail={setSelectedOrder} />
+        <>
+          <RiwayatPesanan orders={paginatedOrders} onDetail={setSelectedOrder} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
 
       {selectedOrder && (

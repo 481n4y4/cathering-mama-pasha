@@ -439,7 +439,7 @@ const LoginForm = () => {
         </div>
         <div className="relative flex justify-center text-sm">
           <span className="px-4 bg-[#FCC7D1] text-[#B8445E]">
-            {activeTab === "masuk" ? "Masuk Cepat" : "Atau daftar dengan"}
+            {activeTab === "masuk"}
           </span>
         </div>
       </div>

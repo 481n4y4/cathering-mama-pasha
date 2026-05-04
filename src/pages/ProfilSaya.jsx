@@ -88,16 +88,6 @@ export default function ProfilSaya({ onNavigate }) {
     fetchUser();
   }, []);
 
-  const getInitials = (name) => {
-    if (!name) return "?";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const profilePhoto =
     userData?.foto_profile || userData?.photo || logoMamaPasha;
 
@@ -122,11 +112,8 @@ export default function ProfilSaya({ onNavigate }) {
     }
   };
 
-  // Baris info sesuai desain UI/UX
-  const usernameValue = userData?.username || userData?.nama_user || "-";
   const infoRows = userData
     ? [
-        { label: "Username", value: usernameValue },
         { label: "Nama", value: userData.nama_user || "-" },
         { label: "Email", value: userData.email || "-" },
         {
@@ -149,7 +136,7 @@ export default function ProfilSaya({ onNavigate }) {
       {/* ══════════════════════════════════
           WRAPPER KONTEN
       ══════════════════════════════════ */}
-      <div className="px-4 py-6 lg:px-8 lg:py-8">
+      <div className="px-4 pt-6 pb-24 lg:px-8 lg:py-8">
         {/* ── SKELETON ── */}
         {loading && (
           <div
@@ -186,7 +173,7 @@ export default function ProfilSaya({ onNavigate }) {
         {!loading && !error && (
           <>
             {/* ════════ MOBILE ════════ */}
-            <div className="lg:hidden w-full rounded-4xl border border-white/50 bg-white/75 p-6 shadow-card backdrop-blur-sm">
+            <div className="lg:hidden w-full rounded-4xl border border-white/50 bg-white/75 p-4 sm:p-6 shadow-card backdrop-blur-sm">
               <div className="flex flex-col items-center mb-6 gap-3">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
                   <img
@@ -195,11 +182,11 @@ export default function ProfilSaya({ onNavigate }) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="text-center">
-                  <p className="text-base font-extrabold text-[#B8445E]">
+                <div className="text-center max-w-full px-2">
+                  <p className="text-base font-extrabold text-[#B8445E] break-words">
                     {userData?.nama_user || "-"}
                   </p>
-                  <p className="text-xs text-[#E47990] mt-0.5">
+                  <p className="text-xs text-[#E47990] mt-0.5 break-all">
                     {userData?.email || "-"}
                   </p>
                 </div>
@@ -219,13 +206,13 @@ export default function ProfilSaya({ onNavigate }) {
                 {infoRows.map(({ label, value }) => (
                   <div
                     key={label}
-                    className="grid grid-cols-[110px_1px_minmax(0,1fr)] items-center gap-4"
+                    className="grid grid-cols-[96px_1px_minmax(0,1fr)] sm:grid-cols-[110px_1px_minmax(0,1fr)] items-start gap-3 sm:gap-4"
                   >
-                    <span className="text-sm text-[#B8445E]/70 font-semibold text-right">
+                    <span className="pt-0.5 text-xs sm:text-sm leading-tight text-[#B8445E]/70 font-semibold text-right">
                       {label}
                     </span>
-                    <div className="w-px h-6 bg-[#B8445E]/20" />
-                    <span className="text-sm font-bold text-[#B8445E]">
+                    <div className="w-px self-stretch bg-[#B8445E]/20" />
+                    <span className="min-w-0 text-sm font-bold text-[#B8445E] leading-snug break-words">
                       {value}
                     </span>
                   </div>

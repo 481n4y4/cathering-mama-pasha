@@ -105,7 +105,7 @@ const SidebarAdmin = ({ children, title = "Admin", onBack }) => {
       onBack();
       return;
     }
-    navigate("/admin/statistik");
+    navigate("/");
   };
 
   return (

@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
-import { getUserNotifications } from "../services/api";
+import { closeNotification, getUserNotifications } from "../services/api";
 
 export default function Notifikasi({ onNavigate }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Semua");
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const tabs = ["Semua", "Promo", "Pesan"];
-  const filtered =
-    activeTab === "Semua"
-      ? notifications
-      : notifications.filter((n) => n.tipe === activeTab);
+  const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -65,6 +60,22 @@ export default function Notifikasi({ onNavigate }) {
     }
   };
 
+  const handleDeleteNotification = async (id) => {
+    const confirmed = window.confirm("Hapus notifikasi ini?");
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    try {
+      await closeNotification(id);
+      setNotifications((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+      alert("Gagal menghapus notifikasi. Silakan coba lagi.");
+    } finally {
+      setDeletingId("");
+    }
+  };
+
   return (
     <ProfilLayout
       activeMenu="notifikasi"
@@ -78,59 +89,45 @@ export default function Notifikasi({ onNavigate }) {
             Cek pemberitahuan terbaru pesananmu disini
           </p>
 
-          {/* Tab filter */}
-          <div className="flex gap-6 px-4 lg:px-8 py-3 border-b border-pink-2/30">
-            {tabs.map((t) => (
-              <button
-                key={t}
-                onClick={() => setActiveTab(t)}
-                className={`text-sm font-bold pb-1 relative transition-colors ${
-                  activeTab === t
-                    ? "text-pink-6"
-                    : "text-text-mid hover:text-text-dark"
-                }`}
-              >
-                {t}
-                {activeTab === t && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-pink-6 rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
-
           {/* List notifikasi */}
           <div className="flex flex-col gap-3 px-4 lg:px-8 py-4 pb-24 lg:pb-6">
             {isLoading && (
               <div className="text-xs text-text-mid">Memuat notifikasi...</div>
             )}
-            {!isLoading && filtered.length === 0 && (
+            {!isLoading && notifications.length === 0 && (
               <div className="text-xs text-text-mid">Belum ada notifikasi.</div>
             )}
-            {filtered.map((n) => (
+            {notifications.map((n) => (
               <div
                 key={n.id}
-                className="bg-white rounded-2xl p-4 shadow-card flex gap-3 items-start"
+                className="relative bg-white rounded-2xl p-4 shadow-card flex gap-3 items-start"
               >
+                <button
+                  type="button"
+                  onClick={() => handleDeleteNotification(n.id)}
+                  disabled={deletingId === n.id}
+                  className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full border border-pink-2 bg-pink-5 text-pink-6 text-sm font-extrabold transition-all hover:bg-pink-1 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Hapus notifikasi"
+                >
+                  {deletingId === n.id ? "..." : "×"}
+                </button>
                 <div
                   className={`w-10 h-10 rounded-full ${n.warna} shrink-0 mt-0.5`}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 pr-8">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-sm font-extrabold text-text-dark leading-snug">
-                      {n.judul}
-                    </p>
-                    <span className="text-[10px] text-text-mid whitespace-nowrap shrink-0">
-                      {n.waktu}
-                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-extrabold text-text-dark leading-snug wrap-break-word">
+                        {n.judul}
+                      </p>
+                      <span className="text-[10px] text-text-mid whitespace-nowrap shrink-0">
+                        {n.waktu}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-xs text-text-mid leading-relaxed">
                     {n.deskripsi}
                   </p>
-                  {n.aksi && (
-                    <button className="mt-2 text-[10px] font-bold border border-pink-2 text-text-dark px-3 py-1 rounded-full hover:bg-pink-5 active:scale-95 transition-all">
-                      {n.aksi}
-                    </button>
-                  )}
                 </div>
               </div>
             ))}

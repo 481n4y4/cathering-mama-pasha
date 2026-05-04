@@ -67,9 +67,12 @@ export default function DetailPesanan() {
   };
 
   return (
-    <SidebarAdmin title="Detail Pesanan">
+    <SidebarAdmin
+      title="Detail Pesanan"
+      onBack={() => navigate("/admin/kelola-pesanan")}
+    >
       <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <NavbarProfile backTo="/" />
+        <NavbarProfile backTo="/admin/kelola-pesanan" />
 
         <div className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -77,7 +80,7 @@ export default function DetailPesanan() {
               Detail Pesanan
             </h1>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/admin/kelola-pesanan")}
               className="bg-[#fdeff2] hover:bg-[#fad8df] text-[#de6a84] font-bold py-2 px-5 rounded-xl transition-colors text-sm w-full sm:w-auto"
             >
               Kembali

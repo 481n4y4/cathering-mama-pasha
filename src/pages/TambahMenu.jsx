@@ -63,15 +63,18 @@ const TambahMenu = () => {
   };
 
   return (
-    <SidebarAdmin title="Tambah Menu">
+    <SidebarAdmin
+      title="Tambah Menu"
+      onBack={() => navigate("/admin/kelola-menu")}
+    >
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <NavbarProfile backTo="/" />
+        <NavbarProfile backTo="/admin/kelola-menu" />
 
         <div className="p-4 sm:p-6 lg:p-10 flex-1 overflow-auto">
           <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-5 sm:p-8">
             <div className="flex items-center gap-4 border-b pb-6 mb-8">
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/admin/kelola-menu")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
               >
                 <ArrowLeft className="w-6 h-6" />
