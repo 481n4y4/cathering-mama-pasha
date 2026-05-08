@@ -20,6 +20,7 @@ import Keranjang from "./pages/Keranjang.jsx";
 import Notifikasi from "./pages/Notifikasi.jsx";
 import BuatPesanan from "./pages/BuatPesanan.jsx";
 import BuktiTransfer from "./pages/BuktiTransfer.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/buat-pesanan" element={<BuatPesanan />} />
           <Route path="/bukti-transfer" element={<BuktiTransfer />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
