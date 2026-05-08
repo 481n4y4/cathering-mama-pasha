@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, registerUser } from "../services/api";
+import {
+  loginUser,
+  registerUser,
+  requestPasswordReset,
+} from "../services/api";
+import logoMamaPasha from "../assets/images/logo-kecil.png";
+import loginIllustration from "../assets/images/image-login.png";
+
+const ENABLE_FORGOT_PASSWORD = false;
 
 const LoginForm = () => {
   const [activeTab, setActiveTab] = useState("masuk");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
 
   const [formData, setFormData] = useState({
     // Login fields
@@ -31,6 +42,45 @@ const LoginForm = () => {
     }));
     // Clear error when user starts typing
     if (error) setError("");
+  };
+
+  const openResetModal = () => {
+    setResetEmail(formData.email);
+    setResetSuccess("");
+    setError("");
+    setShowResetModal(true);
+  };
+
+  const submitResetPassword = async (e) => {
+    e.preventDefault();
+
+    if (!resetEmail.trim()) {
+      setError("Masukkan email terlebih dahulu.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResetSuccess("");
+
+    try {
+      const data = await requestPasswordReset({ email: resetEmail });
+      const successMessage =
+        data?.message ||
+        `Permintaan reset password untuk ${resetEmail} sudah dikirim. Silakan cek email Anda.`;
+
+      setResetSuccess(successMessage);
+      alert(successMessage);
+      setShowResetModal(false);
+    } catch (err) {
+      setError(
+        err?.message ||
+          err?.error ||
+          "Gagal mengirim email reset password. Pastikan backend mendukung endpoint forgot-password.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = async (e) => {
@@ -280,14 +330,17 @@ const LoginForm = () => {
           </div>
 
           {/* Forgot Password Link */}
-          <div className="text-right">
-            <a
-              href="#"
-              className="text-sm text-[#B8445E] hover:text-[#E47990] transition-colors"
-            >
-              Lupa kata sandi?
-            </a>
-          </div>
+          {ENABLE_FORGOT_PASSWORD && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={openResetModal}
+                className="text-sm text-[#B8445E] hover:text-[#E47990] transition-colors"
+              >
+                Lupa kata sandi?
+              </button>
+            </div>
+          )}
 
           {/* Submit Button */}
           <button
@@ -432,17 +485,54 @@ const LoginForm = () => {
         </form>
       )}
 
-      {/* Divider */}
-      <div className="relative my-8">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[#DE8C9C]"></div>
+      {ENABLE_FORGOT_PASSWORD && showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-3xl bg-[#FCC7D1] p-6 shadow-2xl">
+            <h2 className="text-2xl font-semibold text-[#B8445E] mb-2">
+              Reset Kata Sandi
+            </h2>
+            <p className="text-sm text-[#E47990] mb-5">
+              Masukkan email akun Anda untuk menerima petunjuk reset password.
+            </p>
+
+            {resetSuccess && (
+              <div className="mb-4 rounded-2xl border border-green-300 bg-green-100 p-3 text-sm text-green-800">
+                {resetSuccess}
+              </div>
+            )}
+
+            <form onSubmit={submitResetPassword} className="space-y-4">
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full rounded-full bg-[#F8D8DE] px-6 py-4 text-[#B8445E] placeholder-[#E47990] focus:outline-none focus:ring-2 focus:ring-[#DE8C9C]"
+                required
+                disabled={loading}
+              />
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setShowResetModal(false)}
+                  className="flex-1 rounded-full border border-[#B8445E] px-6 py-3 text-[#B8445E] transition-colors hover:bg-[#F8D8DE]"
+                  disabled={loading}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-[#B8445E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#E47990]"
+                  disabled={loading}
+                >
+                  {loading ? "Mengirim..." : "Kirim"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-[#FCC7D1] text-[#B8445E]">
-            {activeTab === "masuk"}
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -452,14 +542,21 @@ function LoginPage() {
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#F8D8DE]">
       {/* Left Section - Form */}
       <div className="bg-[#FCC7D1] p-8 md:p-16 lg:p-20 flex items-center justify-center">
-        <LoginForm />
+        <div className="w-full flex flex-col items-center">
+          <img
+            src={logoMamaPasha}
+            alt="Logo Dapur Mama Pasha"
+            className="w-24 md:w-28 mb-6 object-contain"
+          />
+          <LoginForm />
+        </div>
       </div>
 
       {/* Right Section - Illustration */}
       <div className="bg-[#F0B3C5] hidden md:flex items-center justify-center p-8">
-        <div className="max-w-[450px] lg:max-w-[550px] w-full">
+        <div className="max-w-112.5 lg:max-w-137.5 w-full">
           <img
-            src="/src/assets/images/image-login.png"
+            src={loginIllustration}
             alt="Chef cooking illustration"
             className="w-full h-auto object-contain drop-shadow-xl"
           />

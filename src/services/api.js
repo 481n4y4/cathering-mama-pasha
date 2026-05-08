@@ -42,6 +42,16 @@ export const registerUser = async (userData) => {
   }
 };
 
+export const requestPasswordReset = async ({ email }) => {
+  try {
+    const response = await api.post("/api/auth/forgot-password", { email });
+    return response.data;
+  } catch (error) {
+    console.error("Error requesting password reset:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const getProductById = async (id) => {
   try {
     const response = await api.get(`/api/products/${id}`);
