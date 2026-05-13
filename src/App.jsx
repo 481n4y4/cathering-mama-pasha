@@ -21,12 +21,14 @@ import Notifikasi from "./pages/Notifikasi.jsx";
 import BuatPesanan from "./pages/BuatPesanan.jsx";
 import BuktiTransfer from "./pages/BuktiTransfer.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="/produk/:id" element={<DetailProduk />} />
 

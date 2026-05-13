@@ -98,7 +98,10 @@ export default function Keranjang({ onNavigate }) {
   };
 
   const handleUpdateQty = async (itemId, nextQty) => {
-    if (nextQty < 1) return;
+    if (nextQty < 1) {
+      await handleRemoveItem(itemId);
+      return;
+    }
     setItems((current) =>
       current.map((item) =>
         item.id === itemId ? { ...item, qty: nextQty } : item,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProfilLayout from "../components/ProfilLayout";
 import { getUserOrders } from "../services/api";
 
@@ -405,6 +405,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 export default function PesananSaya({ onNavigate }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("aktif");
   const [currentPage, setCurrentPage] = useState(1);
   const [orders, setOrders] = useState([]);
@@ -412,6 +413,7 @@ export default function PesananSaya({ onNavigate }) {
   const [error, setError] = useState("");
   const [profileUser, setProfileUser] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showUploadSuccess, setShowUploadSuccess] = useState(false);
 
   useEffect(() => {
     const syncProfile = () => {
@@ -482,6 +484,19 @@ export default function PesananSaya({ onNavigate }) {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [fetchOrders]);
+
+  useEffect(() => {
+    if (location.state?.uploadSuccess) {
+      setShowUploadSuccess(true);
+    }
+  }, [location.state]);
+
+  const dismissUploadSuccess = () => {
+    setShowUploadSuccess(false);
+    if (location.state?.uploadSuccess) {
+      navigate(".", { replace: true, state: {} });
+    }
+  };
 
   const mappedOrders = useMemo(
     () =>
@@ -564,6 +579,13 @@ export default function PesananSaya({ onNavigate }) {
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
+  const totalVisibleOrders = visibleOrders.length;
+  const pageStart = totalVisibleOrders
+    ? (currentPage - 1) * pageSize + 1
+    : 0;
+  const pageEnd = totalVisibleOrders
+    ? Math.min(currentPage * pageSize, totalVisibleOrders)
+    : 0;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -639,6 +661,13 @@ export default function PesananSaya({ onNavigate }) {
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
+            {totalVisibleOrders > 0 && (
+              <div className="px-4 lg:px-8 pb-6 -mt-2 flex justify-center">
+                <div className="rounded-full bg-white/80 px-4 py-1.5 text-sm font-extrabold text-[#7c2138] shadow-sm">
+                  {pageEnd} dari {totalVisibleOrders} pesanan
+                </div>
+              </div>
+            )}
           </>
         )
       ) : historyOrders.length === 0 ? (
@@ -651,6 +680,13 @@ export default function PesananSaya({ onNavigate }) {
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
+          {totalVisibleOrders > 0 && (
+            <div className="px-4 lg:px-8 pb-6 -mt-2 flex justify-center">
+              <div className="rounded-full bg-white/80 px-4 py-1.5 text-sm font-extrabold text-[#7c2138] shadow-sm">
+                {pageEnd} dari {totalVisibleOrders} pesanan
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -659,6 +695,71 @@ export default function PesananSaya({ onNavigate }) {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
         />
+      )}
+
+      {showUploadSuccess && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: "rgba(0,0,0,0.35)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              dismissUploadSuccess();
+            }
+          }}
+        >
+          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/80">
+            <div className="relative bg-linear-to-r from-[#a11f3e] via-[#d33c64] to-[#ff7da1] px-6 pt-5 pb-7 text-white">
+              <div className="absolute -top-8 -right-8 h-20 w-20 rounded-full bg-white/15" />
+              <div className="absolute -bottom-10 -left-6 h-20 w-20 rounded-full bg-white/10" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-white/20 text-2xl">
+                    ✅
+                  </span>
+                  <div>
+                    <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-white/90">
+                      Notifikasi
+                    </p>
+                    <p className="text-2xl font-extrabold">Pesanan Masuk</p>
+                  </div>
+                </div>
+                <button
+                  onClick={dismissUploadSuccess}
+                  className="grid h-10 w-10 place-items-center rounded-full bg-white/25 text-white hover:bg-white/35 transition-colors"
+                  aria-label="Tutup"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="px-6 pt-5 pb-6">
+              <p className="text-lg font-semibold text-[#2f0f18] leading-relaxed">
+                Bukti pembayaran sudah terkirim. Pesanan Anda sedang diproses
+                oleh tim kami.
+              </p>
+              <div className="mt-5 flex items-center justify-between rounded-2xl bg-[#fff0f3] px-4 py-3">
+                <div className="text-base text-[#5b1f2d] font-semibold">
+                  Estimasi status berikutnya
+                </div>
+                <div className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-[#a11f3e] shadow-sm">
+                  Diproses
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-end">
+                <button
+                  onClick={dismissUploadSuccess}
+                  className="px-7 py-3.5 text-base font-extrabold text-white bg-[#a11f3e] rounded-full shadow-md shadow-pink-3/60 hover:bg-[#c72f59] transition-colors"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </ProfilLayout>
   );

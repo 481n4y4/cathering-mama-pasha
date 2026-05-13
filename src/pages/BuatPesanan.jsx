@@ -26,6 +26,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
   const [cartError, setCartError] = useState("");
   const [cartSubtotal, setCartSubtotal] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const fallbackItem = produk ?? {
     nama: "Risoles Mayonaise",
@@ -234,13 +235,7 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
         // Buka Snap popup
         await handleQRISPayment(orderId, token);
 
-        // Jika berhasil, redirect ke halaman sukses
-        navigate("/pesanan-saya", {
-          state: {
-            orderId,
-            message: "Pembayaran berhasil! Pesanan Anda sedang diproses.",
-          },
-        });
+        setShowSuccessModal(true);
         return;
       }
 
@@ -499,6 +494,59 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
             >
               Simpan
             </button>
+          </div>
+        </div>
+      )}
+
+      {showSuccessModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: "rgba(0,0,0,0.35)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowSuccessModal(false);
+          }}
+        >
+          <div className="w-full max-w-xs bg-white rounded-2xl p-5 shadow-2xl">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-extrabold text-pink-6">
+                Pembayaran Berhasil
+              </p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-7 h-7 rounded-full bg-pink-5 text-pink-6 font-bold"
+                aria-label="Tutup"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 mb-4">
+              Pesanan Anda sudah masuk dan sedang diproses.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="px-4 py-2 text-xs font-bold text-gray-500"
+              >
+                Lanjut
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate("/pesanan-saya", {
+                    state: {
+                      message:
+                        "Pembayaran berhasil! Pesanan Anda sedang diproses.",
+                    },
+                  });
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-pink-6 rounded-full"
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}

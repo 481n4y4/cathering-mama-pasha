@@ -11,7 +11,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import SidebarAdmin from "../components/SidebarAdmin";
 import NavbarProfile from "../components/NavbarProfile";
-import { getUserById } from "../services/api";
+import { getUserById, requestAdminResetLink } from "../services/api";
 
 const DetailUser = () => {
   const navigate = useNavigate();
@@ -20,6 +20,10 @@ const DetailUser = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetLink, setResetLink] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,6 +63,37 @@ const DetailUser = () => {
     return phoneStr.startsWith("0") ? phoneStr : `0${phoneStr}`;
   };
 
+  const handleGenerateResetLink = async () => {
+    if (!user?.email) return;
+    setResetLoading(true);
+    setResetError("");
+    setResetSuccess("");
+    setResetLink("");
+
+    try {
+      const response = await requestAdminResetLink({
+        email: user.email,
+        sendEmail: false,
+      });
+      const link = response?.data?.resetLink || "";
+      setResetLink(link);
+      setResetSuccess("Link reset berhasil dibuat. Silakan kirim ke user.");
+
+      if (link && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+        setResetSuccess(
+          "Link reset berhasil dibuat dan disalin. Silakan kirim ke user.",
+        );
+      }
+    } catch (err) {
+      setResetError(
+        err?.message || err?.error || "Gagal membuat link reset password.",
+      );
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <SidebarAdmin
       title="Detail Pengguna"
@@ -84,7 +119,7 @@ const DetailUser = () => {
                 {error}
               </div>
             ) : user ? (
-              <div className="flex flex-col md:flex-row gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-10">
                 {/* Profile Avatar / Left Column */}
                 <div className="flex flex-col items-center shrink-0">
                   <div className="w-28 h-28 sm:w-40 sm:h-40 bg-[#f0d8df] rounded-full flex items-center justify-center text-[#e96481] border-4 border-pink-200 mb-4 shadow-sm">
@@ -179,6 +214,52 @@ const DetailUser = () => {
                         {formatDate(user.updatedAt)}
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 w-full border-t pt-6">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGenerateResetLink}
+                        disabled={resetLoading}
+                        className="w-full sm:w-auto bg-[#e4839e] text-white px-5 py-2 rounded-full text-sm font-bold shadow-sm hover:bg-[#d96c86] transition disabled:opacity-60"
+                      >
+                        {resetLoading ? "Membuat Link..." : "Buat Link Reset"}
+                      </button>
+                      {resetLink && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (navigator?.clipboard?.writeText) {
+                              await navigator.clipboard.writeText(resetLink);
+                            }
+                          }}
+                          className="w-full sm:w-auto bg-[#f5e3e6] text-[#d65f7c] px-4 py-2 rounded-full text-xs font-semibold hover:bg-[#eabbc3] transition"
+                        >
+                          Copy Link
+                        </button>
+                      )}
+                    </div>
+
+                    {resetSuccess && (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">
+                        {resetSuccess}
+                      </div>
+                    )}
+
+                    {resetError && (
+                      <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                        {resetError}
+                      </div>
+                    )}
+
+                    {resetLink && (
+                      <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-xl text-xs sm:text-sm break-all">
+                        {resetLink}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

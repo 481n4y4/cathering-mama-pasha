@@ -52,6 +52,38 @@ export const requestPasswordReset = async ({ email }) => {
   }
 };
 
+export const resetPassword = async ({ token, password }) => {
+  try {
+    const response = await api.post("/api/auth/reset-password", {
+      token,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
+export const requestAdminResetLink = async ({ email, sendEmail = false }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post(
+      "/api/auth/admin-reset-link",
+      { email, sendEmail },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error requesting admin reset link:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const getProductById = async (id) => {
   try {
     const response = await api.get(`/api/products/${id}`);
