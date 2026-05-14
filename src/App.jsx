@@ -20,6 +20,7 @@ import Keranjang from "./pages/Keranjang.jsx";
 import Notifikasi from "./pages/Notifikasi.jsx";
 import BuatPesanan from "./pages/BuatPesanan.jsx";
 import BuktiTransfer from "./pages/BuktiTransfer.jsx";
+import PembayaranQris from "./pages/PembayaranQris.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 
@@ -41,10 +42,7 @@ export default function App() {
           <Route path="/admin/kelola-menu" element={<KelolaMenu />} />
           <Route path="/admin/kelola-user" element={<KelolaUser />} />
           <Route path="/admin/kelola-pesanan" element={<KelolaPesanan />} />
-          <Route
-            path="/admin/kelola-pesanan/:id"
-            element={<DetailPesanan />}
-          />
+          <Route path="/admin/kelola-pesanan/:id" element={<DetailPesanan />} />
           <Route path="/admin/notifikasi" element={<NotifAdmin />} />
           <Route path="/admin/kelola-menu/tambah" element={<TambahMenu />} />
           <Route path="/admin/kelola-menu/edit/:id" element={<EditMenu />} />
@@ -54,6 +52,7 @@ export default function App() {
           <Route path="/notifikasi" element={<Notifikasi />} />
           <Route path="/buat-pesanan" element={<BuatPesanan />} />
           <Route path="/bukti-transfer" element={<BuktiTransfer />} />
+          <Route path="/pembayaran-qris" element={<PembayaranQris />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

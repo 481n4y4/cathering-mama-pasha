@@ -295,6 +295,29 @@ export const uploadBuktiTransfer = async ({ orderId, file }) => {
   }
 };
 
+export const uploadBuktiQris = async ({ orderId, file }) => {
+  try {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("bukti_qris", file);
+
+    const response = await api.post(
+      `/api/orders/upload-qris/${orderId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading QRIS proof:", error);
+    throw error.response?.data || error.message || error;
+  }
+};
+
 export const getUserOrders = async () => {
   try {
     const token = localStorage.getItem("token");

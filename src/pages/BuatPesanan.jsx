@@ -6,8 +6,6 @@ import {
   createOrder,
   getCart,
   getUserById,
-  paymentMidtrans,
-  updatePaymentStatus,
 } from "../services/api";
 
 /* ── Halaman Buat Pesanan ────────────────────────────────── */
@@ -164,43 +162,8 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
     navigate("/keranjang");
   };
 
-  const handleQRISPayment = async (orderId, token) => {
-    return new Promise((resolve, reject) => {
-      if (!window.snap) {
-        reject(new Error("Midtrans Snap library tidak tersedia"));
-        return;
-      }
-
-      window.snap.pay(token, {
-        onSuccess: async (result) => {
-          try {
-            console.log("Payment success:", result);
-            // Update payment status di backend
-            await updatePaymentStatus({
-              orderId,
-              transaction_status: result.transaction_status,
-            });
-            resolve(result);
-          } catch (error) {
-            console.error("Error updating payment status:", error);
-            reject(error);
-          }
-        },
-        onPending: (result) => {
-          console.log("Payment pending:", result);
-          reject(new Error("Pembayaran masih pending. Silakan coba lagi."));
-        },
-        onError: (result) => {
-          console.log("Payment error:", result);
-          reject(new Error("Pembayaran gagal. Silakan coba lagi."));
-        },
-        onClose: () => {
-          console.log("Payment popup closed");
-          reject(new Error("Pembayaran dibatalkan."));
-        },
-      });
-    });
-  };
+  // Midtrans integration removed. QRIS will be handled by navigating
+  // to the QRIS payment page where user can scan and upload proof.
 
   const handleCheckout = async () => {
     setSubmitError("");
@@ -225,17 +188,9 @@ export default function BuatPesanan({ onBack, produk, qty = 20, onPesan }) {
       }
 
       if (metodePembayaran === "Qris") {
-        const paymentResponse = await paymentMidtrans({ orderId });
-        const token = paymentResponse?.data?.payment?.token;
-
-        if (!token) {
-          throw new Error("Token pembayaran QRIS tidak tersedia.");
-        }
-
-        // Buka Snap popup
-        await handleQRISPayment(orderId, token);
-
-        setShowSuccessModal(true);
+        navigate("/pembayaran-qris", {
+          state: { orderId, metodePembayaran },
+        });
         return;
       }
 
