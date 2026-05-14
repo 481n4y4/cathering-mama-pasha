@@ -73,6 +73,7 @@ const KelolaPesanan = () => {
         const firstItem = order.items?.[0];
         const product = firstItem?.produk || {};
         const dateValue = order.tanggal_pengiriman || order.createdAt || "";
+        const sortValue = order.createdAt || order.tanggal_pengiriman || "";
         const normalizedStatus = normalizeStatus(order.status);
         return {
           id: order._id,
@@ -81,6 +82,7 @@ const KelolaPesanan = () => {
           alamat: order.user?.alamat || "",
           tanggal: formatTanggal(dateValue),
           dateValue,
+          sortValue,
           pesanan: `${order.jumlah_produk || 0} ${product.nama_produk || "Pesanan"}`,
           metode: order.metode_pembayaran,
           buktiTransfer: order.bukti_transfer || "",
@@ -100,8 +102,8 @@ const KelolaPesanan = () => {
         ? mappedOrders
         : mappedOrders.filter((order) => order.status === filterStatus);
     return [...filtered].sort((a, b) => {
-      const aTime = a.dateValue ? new Date(a.dateValue).getTime() : 0;
-      const bTime = b.dateValue ? new Date(b.dateValue).getTime() : 0;
+      const aTime = a.sortValue ? new Date(a.sortValue).getTime() : 0;
+      const bTime = b.sortValue ? new Date(b.sortValue).getTime() : 0;
       return bTime - aTime;
     });
   }, [filterStatus, mappedOrders]);
